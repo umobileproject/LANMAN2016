@@ -316,7 +316,6 @@ Interest::wireDecode(const Block& wire)
   // Destination Flag
   m_destinationFlag.wireDecode(m_wire.get(tlv::DestinationFlag));
 
-
   // Name
   m_name.wireDecode(m_wire.get(tlv::Name));
 

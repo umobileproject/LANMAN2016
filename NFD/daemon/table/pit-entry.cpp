@@ -34,7 +34,26 @@ const Name Entry::LOCALHOP_NAME("ndn:/localhop");
 
 Entry::Entry(const Interest& interest)
   : m_interest(interest.shared_from_this())
+  , m_destination_flag(false)
 {
+}
+
+const bool 
+Entry::getDestinationFlag()
+{
+  return m_destination_flag;
+}
+
+void
+Entry::setDestinationFlag()
+{
+  m_destination_flag = true;
+}
+
+void 
+Entry::clearDestinationFlag()
+{
+  m_destination_flag = false;
 }
 
 const Name&

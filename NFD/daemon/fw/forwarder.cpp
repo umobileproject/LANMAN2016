@@ -132,13 +132,29 @@ Forwarder::onContentStoreMiss(const Face& inFace,
   // set PIT unsatisfy timer
   this->setUnsatisfyTimer(pitEntry);
 
+  shared_ptr<fib::Entry> fibEntry;
   // FIB lookup
-  shared_ptr<fib::Entry> fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
-
-  //TODO add exact match lookup for SIT table
-  if(m_sit.isEmpty(fibEntry)) { //check SIT table
-    fibEntry = m_sit.findExactMatch((*pitEntry).getName());         
+  if(0 == interest.getDestinationFlag().getFlag())
+  {
+    fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
+    //TODO add exact match lookup for SIT table
+    if(m_fib.isEmpty(fibEntry)) { //check SIT table
+      fibEntry = m_sit.findExactMatch((*pitEntry).getName());         
+	   if(!m_sit.isEmpty(fibEntry))
+	     (*pitEntry).setDestinationFlag(); 
+    }
   }
+  else
+  {
+    fibEntry = m_sit.findExactMatch((*pitEntry).getName());         
+	 if(!m_sit.isEmpty(fibEntry))
+	 {
+      NFD_LOG_DEBUG("onContentStoreMiss: ERROR, no match in SIT table; this should not happen");
+		//TODO send a NACK???
+      fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
+    }
+  }
+
   // dispatch to strategy
   this->dispatchToStrategy(pitEntry, bind(&Strategy::afterReceiveInterest, _1,
                                           cref(inFace), cref(interest), fibEntry, pitEntry));
@@ -232,6 +248,11 @@ Forwarder::onOutgoingInterest(shared_ptr<pit::Entry> pitEntry, Face& outFace,
     interest = make_shared<Interest>(*interest);
     static boost::random::uniform_int_distribution<uint32_t> dist;
     interest->setNonce(dist(getGlobalRng()));
+  }
+
+  if(pitEntry->getDestinationFlag())
+  { //set the destination flag in the Interest packet
+    interest->setDestinationFlag();
   }
 
   // insert OutRecord
@@ -362,6 +383,13 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
     this->setStragglerTimer(pitEntry, true, data.getFreshnessPeriod());
   }
 
+  // insert SIT enrty: first lookup the name
+  shared_ptr<fib::Entry> sitEntry = m_sit.findExactMatch(data.getName());
+  if(m_sit.isEmpty(sitEntry))
+  {
+    sitEntry = m_sit.insert(data.getName()).first;
+  }
+
   // foreach pending downstream
   for (std::set<shared_ptr<Face> >::iterator it = pendingDownstreams.begin();
       it != pendingDownstreams.end(); ++it) {
@@ -369,6 +397,9 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
     if (pendingDownstream.get() == &inFace) {
       continue;
     }
+    //insert SIT entry
+    sitEntry->addNextHop(pendingDownstream, 0);
+
     // goto outgoing Data pipeline
     this->onOutgoingData(data, *pendingDownstream);
   }

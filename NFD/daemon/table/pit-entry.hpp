@@ -70,6 +70,15 @@ public:
   explicit
   Entry(const Interest& interest);
 
+  const bool
+  getDestinationFlag();
+
+  void
+  setDestinationFlag();
+
+  void 
+  clearDestinationFlag();
+
   const Interest&
   getInterest() const;
 
@@ -176,6 +185,7 @@ private:
   static const Name LOCALHOP_NAME;
 
   shared_ptr<name_tree::Entry> m_nameTreeEntry;
+  bool m_destination_flag; //Onur 
 
   friend class nfd::NameTree;
   friend class nfd::name_tree::Entry;
