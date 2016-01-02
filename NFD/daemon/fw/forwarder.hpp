@@ -222,6 +222,7 @@ private:
 
   // tables
   NameTree       m_nameTree;
+  NameTree       m_nameTree_sit; //nameTree for the SIT table
   Fib            m_fib;
   Pit            m_pit;
   Fib            m_sit;

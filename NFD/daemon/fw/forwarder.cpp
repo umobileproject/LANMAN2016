@@ -45,7 +45,7 @@ Forwarder::Forwarder()
   : m_faceTable(*this)
   , m_fib(m_nameTree)
   , m_pit(m_nameTree)
-  , m_sit(m_nameTree)
+  , m_sit(m_nameTree_sit)
   , m_measurements(m_nameTree)
   , m_strategyChoice(m_nameTree, fw::makeDefaultStrategy(*this))
   , m_csFace(make_shared<NullFace>(FaceUri("contentstore://")))
@@ -385,7 +385,7 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
 
   // insert SIT enrty: first lookup the name
   shared_ptr<fib::Entry> sitEntry = m_sit.findExactMatch(data.getName());
-  if(m_sit.isEmpty(sitEntry))
+  if(!static_cast<bool>(sitEntry))
   {
     sitEntry = m_sit.insert(data.getName()).first;
   }
@@ -393,12 +393,13 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
   // foreach pending downstream
   for (std::set<shared_ptr<Face> >::iterator it = pendingDownstreams.begin();
       it != pendingDownstreams.end(); ++it) {
-    shared_ptr<Face> pendingDownstream = *it;
+    shared_ptr<Face> pendingDownstream = getFace((*it)->getId());
     if (pendingDownstream.get() == &inFace) {
       continue;
     }
     //insert SIT entry
-    sitEntry->addNextHop(pendingDownstream, 0);
+	 //if(static_cast<bool> (sitEntry) )
+      sitEntry->addNextHop(pendingDownstream, 0);
 
     // goto outgoing Data pipeline
     this->onOutgoingData(data, *pendingDownstream);
