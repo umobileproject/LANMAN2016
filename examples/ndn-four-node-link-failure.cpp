@@ -32,10 +32,24 @@ namespace ns3 {
 /**
  * This scenario simulates a very simple network topology:
  *
- *
- *      +----------+     1Mbps      +--------+     1Mbps      +----------+
- *      | consumer | <------------> | router | <------------> | producer |
- *      +----------+         10ms   +--------+          10ms  +----------+
+ *          (0)                         (1)                      (5)                         (2)
+ *      +----------+     1Mbps      +---------+      1Mbps   +---------+     1Mbps      +----------+
+ *      | consumer1| <------------> | router1 | <----------->| router2 | <------------> | producer |
+ *      +----------+     10ms       +---------+      10ms    +---------+     10ms       +----------+
+ *                                       ^
+ *                                       |
+ *                                       |
+ *                                       v
+ *                                  +---------+
+ *                                  | router3 | (4)
+ *                                  +---------+
+ *                                       ^
+ *                                       |
+ *                                       |
+ *                                       v
+ *                                  +----------+
+ *                                  | consumer2| (3)
+ *                                  +----------+
  *
  *
  * Consumer requests data from producer with frequency 10 interests per second
@@ -63,37 +77,63 @@ main(int argc, char* argv[])
 
   // Creating nodes
   NodeContainer nodes;
-  nodes.Create(3);
+  nodes.Create(6);
 
   // Connecting nodes using two links
   PointToPointHelper p2p;
   p2p.Install(nodes.Get(0), nodes.Get(1));
-  p2p.Install(nodes.Get(1), nodes.Get(2));
+  p2p.Install(nodes.Get(1), nodes.Get(5));
+  p2p.Install(nodes.Get(5), nodes.Get(2));
+  p2p.Install(nodes.Get(1), nodes.Get(4));
+  p2p.Install(nodes.Get(4), nodes.Get(3));
 
   // Install NDN stack on all nodes
   ndn::StackHelper ndnHelper;
-  ndnHelper.SetDefaultRoutes(true);
+  //ndnHelper.SetDefaultRoutes(true);
   ndnHelper.InstallAll();
+
+   // Set BestRoute strategy
+  ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/best-route");
+
+  // Installing global routing interface on all nodes
+  ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
+  ndnGlobalRoutingHelper.InstallAll();
 
   // Installing applications
 
-  // Consumer
-  ndn::AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
+  std::string prefix = "/prefix";
+
+  // Consumer 1
+  ndn::AppHelper consumerHelper1("ns3::ndn::ConsumerCbr");
   // Consumer will request /prefix/0, /prefix/1, ...
-  consumerHelper.SetPrefix("/prefix");
-  consumerHelper.SetAttribute("Frequency", StringValue("10")); // 10 interests a second
-  consumerHelper.Install(nodes.Get(0));                        // first node
+  consumerHelper1.SetPrefix(prefix);
+  consumerHelper1.SetAttribute("Frequency", StringValue("10")); // 10 interests a second
+  consumerHelper1.Install(nodes.Get(0));                        // first node
+
+  // Consumer 2
+  ndn::AppHelper consumerHelper2("ns3::ndn::ConsumerCbr");
+  // Consumer will request /prefix/0, /prefix/1, ...
+  consumerHelper2.SetPrefix(prefix);
+  consumerHelper2.SetAttribute("Frequency", StringValue("10")); // 10 interests a second
+  consumerHelper2.Install(nodes.Get(3));                        // fourth node
 
   // Producer
   ndn::AppHelper producerHelper("ns3::ndn::Producer");
   // Producer will reply to all requests starting with /prefix
-  producerHelper.SetPrefix("/prefix");
+  producerHelper.SetPrefix(prefix);
   producerHelper.SetAttribute("PayloadSize", StringValue("1024"));
   producerHelper.Install(nodes.Get(2)); // last node
+  Ptr<Node> producer = nodes.Get(2);
 
   // The failure of the link connecting consumer and router will start from seconds 10.0 to 15.0
-  Simulator::Schedule(Seconds(10.0), ndn::LinkControlHelper::FailLink, nodes.Get(0), nodes.Get(1));
-  Simulator::Schedule(Seconds(15.0), ndn::LinkControlHelper::UpLink, nodes.Get(0), nodes.Get(1));
+  Simulator::Schedule(Seconds(10.0), ndn::LinkControlHelper::FailLink, nodes.Get(1), nodes.Get(5));
+  Simulator::Schedule(Seconds(15.0), ndn::LinkControlHelper::UpLink, nodes.Get(1), nodes.Get(5));
+
+  // Add /prefix origins to ndn::GlobalRouter
+  ndnGlobalRoutingHelper.AddOrigins(prefix, producer);
+
+  // Calculate and install FIBs
+  ndn::GlobalRoutingHelper::CalculateRoutes();
 
   Simulator::Stop(Seconds(20.0));
 

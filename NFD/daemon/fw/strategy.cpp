@@ -58,6 +58,9 @@ void
 Strategy::beforeExpirePendingInterest(shared_ptr<pit::Entry> pitEntry)
 {
   NFD_LOG_DEBUG("beforeExpirePendingInterest pitEntry=" << pitEntry->getName());
+  //TODO (Onur) Overload this to remove the current next hop from the FIB table so the forwarding fallsback to the SIT table
+
+
 }
 
 //void
