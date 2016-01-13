@@ -16,6 +16,7 @@ public:
   DestinationFlag()
   : m_dfBlock(tlv::DestinationFlag) 
   {
+    m_flag = 0;
   }
 
   DestinationFlag(unsigned int flag)

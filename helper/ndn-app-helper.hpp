@@ -50,6 +50,12 @@ public:
    */
   void
   SetPrefix(const std::string& prefix);
+  
+  /**
+   * @brief Set the initial sequence number in the interest packet that the consumer will be requesting
+   */
+  void
+  SetStartSeq(const int seq);
 
   /**
    * \brief Helper function used to set the underlying application attributes.

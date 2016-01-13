@@ -1965,6 +1965,10 @@ DescriptionKey	ndn-cxx/src/encoding/tlv.hpp	/^  DescriptionKey = 513,$/;"	e	enum
 DescriptionValue	ndn-cxx/src/encoding/tlv.hpp	/^  DescriptionValue = 514$/;"	e	enum:ndn::tlv::__anon9
 Deserialize	model/ndn-header.cpp	/^PacketHeader<Pkt>::Deserialize(ns3::Buffer::Iterator start)$/;"	f	class:ns3::ndn::PacketHeader
 Deserialize	utils/ndn-fw-hop-count-tag.cpp	/^FwHopCountTag::Deserialize(TagBuffer i)$/;"	f	class:ns3::ndn::FwHopCountTag
+DestinationFlag	ndn-cxx/src/destination-flag.hpp	/^  DestinationFlag()$/;"	f	class:ndn::DestinationFlag
+DestinationFlag	ndn-cxx/src/destination-flag.hpp	/^  DestinationFlag(unsigned int flag)$/;"	f	class:ndn::DestinationFlag
+DestinationFlag	ndn-cxx/src/destination-flag.hpp	/^class DestinationFlag $/;"	c	namespace:ndn
+DestinationFlag	ndn-cxx/src/encoding/tlv.hpp	/^  DestinationFlag = 33,$/;"	e	enum:ndn::tlv::__anon8
 Destroy	utils/tracers/l2-rate-tracer.cpp	/^L2RateTracer::Destroy()$/;"	f	class:ns3::L2RateTracer
 Destroy	utils/tracers/ndn-app-delay-tracer.cpp	/^AppDelayTracer::Destroy()$/;"	f	class:ns3::ndn::AppDelayTracer
 Destroy	utils/tracers/ndn-cs-tracer.cpp	/^CsTracer::Destroy()$/;"	f	class:ns3::ndn::CsTracer
@@ -3265,6 +3269,7 @@ NDN_CXX_SPECIALIZE_BOOST_IS_PLACEHOLDER_FOR_STD_PLACEHOLDER	ndn-cxx/src/common.h
 NDN_CXX_VIRTUAL_WITH_TESTS	ndn-cxx/src/common.hpp	36;"	d
 NDN_CXX_VIRTUAL_WITH_TESTS	ndn-cxx/src/common.hpp	41;"	d
 NDN_DATA_HPP	ndn-cxx/src/data.hpp	23;"	d
+NDN_DESTINATIONFLAG_HPP	ndn-cxx/src/destination-flag.hpp	2;"	d
 NDN_DETAIL_CONTAINER_WITH_ON_EMPTY_SIGNAL_HPP	ndn-cxx/src/detail/container-with-on-empty-signal.hpp	23;"	d
 NDN_DETAIL_FACE_IMPL_HPP	ndn-cxx/src/detail/face-impl.hpp	23;"	d
 NDN_DETAIL_INTEREST_FILTER_RECORD_HPP	ndn-cxx/src/detail/interest-filter-record.hpp	23;"	d
@@ -5608,6 +5613,7 @@ clear	model/cs/custom-policies/freshness-policy.hpp	/^      clear()$/;"	f	class:
 clear	model/cs/custom-policies/lifetime-stats-policy.hpp	/^      clear()$/;"	f	class:ns3::ndn::ndnSIM::lifetime_stats_policy_traits::policy::type
 clear	model/cs/custom-policies/probability-policy.hpp	/^      clear()$/;"	f	class:ns3::ndn::ndnSIM::probability_policy_traits::policy::type
 clear	model/ndn-global-router.cpp	/^GlobalRouter::clear()$/;"	f	class:ns3::ndn::GlobalRouter
+clear	ndn-cxx/src/destination-flag.cpp	/^DestinationFlag::clear()$/;"	f	class:ndn::DestinationFlag
 clear	ndn-cxx/src/detail/container-with-on-empty-signal.hpp	/^  clear()$/;"	f	class:ndn::ContainerWithOnEmptySignal
 clear	ndn-cxx/src/exclude.hpp	/^Exclude::clear()$/;"	f	class:ndn::Exclude
 clear	ndn-cxx/src/key-locator.cpp	/^KeyLocator::clear()$/;"	f	class:ndn::KeyLocator
@@ -5629,6 +5635,7 @@ clear	utils/trie/persistent-policy.hpp	/^      clear()$/;"	f	class:ns3::ndn::ndn
 clear	utils/trie/random-policy.hpp	/^      clear()$/;"	f	class:ns3::ndn::ndnSIM::random_policy_traits::policy::type
 clear	utils/trie/trie-with-policy.hpp	/^  clear()$/;"	f	class:ns3::ndn::ndnSIM::trie_with_policy
 clear	utils/trie/trie.hpp	/^  clear()$/;"	f	class:ns3::ndn::ndnSIM::trie
+clearDestinationFlag	NFD/daemon/table/pit-entry.cpp	/^Entry::clearDestinationFlag()$/;"	f	class:nfd::pit::Entry
 clearFibUpdates	NFD/tests/rib/fib-updates-common.hpp	/^  clearFibUpdates()$/;"	f	class:nfd::rib::tests::FibUpdatesFixture
 clearRefreshEvents	NFD/rib/remote-registrator.cpp	/^RemoteRegistrator::clearRefreshEvents()$/;"	f	class:nfd::rib::RemoteRegistrator
 clearRoutes	ndn-cxx/src/management/nfd-rib-entry.hpp	/^  clearRoutes()$/;"	f	class:ndn::nfd::RibEntry
@@ -7280,6 +7287,8 @@ getDefaultTpmLocator	ndn-cxx/src/security/key-chain.cpp	/^KeyChain::getDefaultTp
 getDelegationFromWire	ndn-cxx/src/link.cpp	/^Link::getDelegationFromWire(const Block& block, size_t index)$/;"	f	class:ndn::Link
 getDelegations	ndn-cxx/src/link.cpp	/^Link::getDelegations() const$/;"	f	class:ndn::Link
 getDescription	NFD/daemon/face/face.hpp	/^Face::getDescription() const$/;"	f	class:nfd::Face
+getDestinationFlag	NFD/daemon/table/pit-entry.cpp	/^Entry::getDestinationFlag()$/;"	f	class:nfd::pit::Entry
+getDestinationFlag	ndn-cxx/src/interest.hpp	/^  getDestinationFlag() const$/;"	f	class:ndn::Interest
 getDigestAlgorithm	ndn-cxx/src/security/sec-tpm-osx.cpp	/^SecTpmOsx::Impl::getDigestAlgorithm(DigestAlgorithm digestAlgo)$/;"	f	class:ndn::SecTpmOsx::Impl
 getDigestAlgorithm	ndn-cxx/src/security/signing-info.hpp	/^  getDigestAlgorithm() const$/;"	f	class:ndn::security::SigningInfo
 getDigestSize	ndn-cxx/src/security/sec-tpm-osx.cpp	/^SecTpmOsx::Impl::getDigestSize(DigestAlgorithm digestAlgo)$/;"	f	class:ndn::SecTpmOsx::Impl
@@ -7336,6 +7345,7 @@ getFilter	ndn-cxx/src/detail/interest-filter-record.hpp	/^  getFilter() const$/;
 getFilter	ndn-cxx/src/detail/registered-prefix.hpp	/^  getFilter() const$/;"	f	class:ndn::RegisteredPrefix
 getFinalBlockId	ndn-cxx/src/data.hpp	/^Data::getFinalBlockId() const$/;"	f	class:ndn::Data
 getFinalBlockId	ndn-cxx/src/meta-info.hpp	/^MetaInfo::getFinalBlockId() const$/;"	f	class:ndn::MetaInfo
+getFlag	ndn-cxx/src/destination-flag.cpp	/^DestinationFlag::getFlag() const$/;"	f	class:ndn::DestinationFlag
 getFlags	ndn-cxx/src/management/nfd-control-parameters.hpp	/^  getFlags() const$/;"	f	class:ndn::nfd::ControlParameters
 getFlags	ndn-cxx/src/management/nfd-rib-entry.hpp	/^  getFlags() const$/;"	f	class:ndn::nfd::Route
 getForwardRange	NFD/daemon/fw/face-table.cpp	/^FaceTable::getForwardRange() const$/;"	f	class:nfd::FaceTable
@@ -8328,6 +8338,7 @@ isConnected	ndn-cxx/src/util/signal-scoped-connection.cpp	/^ScopedConnection::is
 isCorrectName	ndn-cxx/src/security/identity-certificate.cpp	/^IdentityCertificate::isCorrectName(const Name& name)$/;"	f	class:ndn::IdentityCertificate
 isDataReceived	NFD/tools/ndn-tlv-peek.cpp	/^  isDataReceived() const$/;"	f	class:ndntlvpeek::NdnTlvPeek
 isDataSent	NFD/tools/ndn-tlv-poke.cpp	/^  isDataSent() const$/;"	f	class:ndntlvpoke::NdnTlvPoke
+isEmpty	NFD/daemon/table/fib.cpp	/^Fib::isEmpty(shared_ptr<fib::Entry> fibEntry) const$/;"	f	class:nfd::Fib
 isEmpty	NFD/daemon/table/name-tree-entry.cpp	/^Entry::isEmpty() const$/;"	f	class:nfd::name_tree::Entry
 isEmpty	ndn-cxx/src/security/certificate-cache.hpp	/^  isEmpty()$/;"	f	class:ndn::CertificateCache
 isEmpty	ndn-cxx/src/security/validator-config.cpp	/^ValidatorConfig::isEmpty()$/;"	f	class:ndn::ValidatorConfig
@@ -8856,8 +8867,11 @@ m_delegations	ndn-cxx/src/link.hpp	/^  DelegationSet m_delegations;$/;"	m	class:
 m_deleter	ndn-cxx/src/detail/pending-interest.hpp	/^  std::function<void()> m_deleter;$/;"	m	class:ndn::PendingInterest
 m_description	NFD/daemon/face/face.hpp	/^  std::string m_description;$/;"	m	class:nfd::Face
 m_destAddress	NFD/daemon/face/ethernet-face.hpp	/^  ethernet::Address m_destAddress;$/;"	m	class:nfd::EthernetFace
+m_destinationFlag	ndn-cxx/src/interest.hpp	/^  DestinationFlag m_destinationFlag;$/;"	m	class:ndn::Interest
+m_destination_flag	NFD/daemon/table/pit-entry.hpp	/^  bool m_destination_flag; \/\/Onur $/;"	m	class:nfd::pit::Entry
 m_destroyFaceFired	NFD/tests/daemon/mgmt/face-manager.t.cpp	/^  bool m_destroyFaceFired;$/;"	m	class:nfd::tests::ValidatedFaceRequestFixture	file:
 m_device	ndn-cxx/src/encoding/buffer-stream.hpp	/^  iostreams::buffer_append_device m_device;$/;"	m	class:ndn::OBufferStream
+m_dfBlock	ndn-cxx/src/destination-flag.hpp	/^  mutable Block m_dfBlock;$/;"	m	class:ndn::DestinationFlag
 m_didAddEntry	model/cs/content-store-impl.hpp	/^  TracedCallback<Ptr<const Entry>> m_didAddEntry;$/;"	m	class:ns3::ndn::cs::ContentStoreImpl
 m_digest	ndn-cxx/src/security/public-key.hpp	/^  mutable Block m_digest;$/;"	m	class:ndn::PublicKey
 m_digestAlgorithm	ndn-cxx/src/security/signing-info.hpp	/^  DigestAlgorithm m_digestAlgorithm;$/;"	m	class:ndn::security::SigningInfo
@@ -9056,6 +9070,7 @@ m_finished	NFD/tests/daemon/mgmt/strategy-choice-publisher.t.cpp	/^  bool m_fini
 m_firstInterestDataDelay	apps/ndn-consumer.hpp	/^                 uint32_t \/*retx count*\/, int32_t \/*hop count*\/> m_firstInterestDataDelay;$/;"	m	class:ns3::ndn::Consumer
 m_firstTime	apps/ndn-consumer-cbr.hpp	/^  bool m_firstTime;$/;"	m	class:ns3::ndn::ConsumerCbr
 m_fit	NFD/daemon/fw/access-strategy.hpp	/^  FaceInfoTable m_fit;$/;"	m	class:nfd::fw::AccessStrategy
+m_flag	ndn-cxx/src/destination-flag.hpp	/^  uint64_t m_flag;$/;"	m	class:ndn::DestinationFlag
 m_flags	NFD/tools/nfdc.hpp	/^  uint64_t m_flags;$/;"	m	class:nfdc::Nfdc
 m_flags	ndn-cxx/src/management/nfd-control-parameters.hpp	/^  uint64_t            m_flags;$/;"	m	class:ndn::nfd::ControlParameters
 m_flags	ndn-cxx/src/management/nfd-rib-entry.hpp	/^  uint64_t m_flags;$/;"	m	class:ndn::nfd::Route
@@ -9589,6 +9604,7 @@ m_nameTreeEntry	NFD/daemon/table/strategy-choice-entry.hpp	/^  shared_ptr<name_t
 m_nameTreeIterator	NFD/daemon/table/fib.hpp	/^    NameTree::const_iterator m_nameTreeIterator;$/;"	m	class:nfd::Fib::const_iterator
 m_nameTreeIterator	NFD/daemon/table/pit.hpp	/^    NameTree::const_iterator m_nameTreeIterator;$/;"	m	class:nfd::Pit::const_iterator
 m_nameTreeIterator	NFD/daemon/table/strategy-choice.hpp	/^    NameTree::const_iterator m_nameTreeIterator;$/;"	m	class:nfd::StrategyChoice::const_iterator
+m_nameTree_sit	NFD/daemon/fw/forwarder.hpp	/^  NameTree       m_nameTree_sit; \/\/nameTree for the SIT table$/;"	m	class:nfd::Forwarder
 m_names	NFD/tests/daemon/table/name-tree.t.cpp	/^  std::unordered_set<Name> m_names;$/;"	m	class:nfd::tests::EnumerationVerifier	file:
 m_ndn	model/ndn-global-router.hpp	/^  Ptr<L3Protocol> m_ndn;$/;"	m	class:ns3::ndn::GlobalRouter
 m_ndnFactory	helper/ndn-stack-helper.hpp	/^  ObjectFactory m_ndnFactory;$/;"	m	class:ns3::ndn::StackHelper
@@ -9973,6 +9989,7 @@ m_signers	ndn-cxx/src/security/conf/checker.hpp	/^  SignerList m_signers;$/;"	m	
 m_signingInfo	ndn-cxx/src/management/nfd-command-options.hpp	/^  security::SigningInfo m_signingInfo;$/;"	m	class:ndn::nfd::CommandOptions
 m_signingInfo	ndn-cxx/src/mgmt/dispatcher.hpp	/^  security::SigningInfo m_signingInfo;$/;"	m	class:ndn::mgmt::Dispatcher
 m_simulationTime	tests/other/ndn-test.cpp	/^  Time m_simulationTime;$/;"	m	class:ns3::Tester	file:
+m_sit	NFD/daemon/fw/forwarder.hpp	/^  Fib            m_sit;$/;"	m	class:nfd::Forwarder
 m_size	NFD/websocketpp/test/message_buffer/alloc.cpp	/^    size_t                              m_size;$/;"	m	struct:stub	file:
 m_size	ndn-cxx/src/encoding/block.hpp	/^  uint32_t m_size;$/;"	m	class:ndn::Block
 m_size	ndn-cxx/src/security/key-params.hpp	/^  uint32_t m_size;$/;"	m	class:ndn::SimplePublicKeyParams
@@ -10255,6 +10272,8 @@ main	examples/ndn-custom-apps.cpp	/^main(int argc, char* argv[])$/;"	f	namespace
 main	examples/ndn-cxx-simple.cpp	/^main(int argc, char* argv[])$/;"	f
 main	examples/ndn-cxx-simple.cpp	/^main(int argc, char* argv[])$/;"	f	namespace:ns3
 main	examples/ndn-different-strategy-per-prefix.cpp	/^main(int argc, char* argv[])$/;"	f
+main	examples/ndn-four-node-link-failure.cpp	/^main(int argc, char* argv[])$/;"	f
+main	examples/ndn-four-node-link-failure.cpp	/^main(int argc, char* argv[])$/;"	f	namespace:ns3
 main	examples/ndn-grid-multiple-strategies.cpp	/^main(int argc, char* argv[])$/;"	f
 main	examples/ndn-grid-topo-plugin-loss.cpp	/^main(int argc, char* argv[])$/;"	f
 main	examples/ndn-grid-topo-plugin-loss.cpp	/^main(int argc, char* argv[])$/;"	f	namespace:ns3
@@ -10273,8 +10292,6 @@ main	examples/ndn-simple-with-content-freshness.cpp	/^main(int argc, char* argv[
 main	examples/ndn-simple-with-content-freshness.cpp	/^main(int argc, char* argv[])$/;"	f	namespace:ns3
 main	examples/ndn-simple-with-different-sizes-content-store.cpp	/^main(int argc, char* argv[])$/;"	f
 main	examples/ndn-simple-with-different-sizes-content-store.cpp	/^main(int argc, char* argv[])$/;"	f	namespace:ns3
-main	examples/ndn-simple-with-link-failure.cpp	/^main(int argc, char* argv[])$/;"	f
-main	examples/ndn-simple-with-link-failure.cpp	/^main(int argc, char* argv[])$/;"	f	namespace:ns3
 main	examples/ndn-simple-with-pcap.cpp	/^main(int argc, char* argv[])$/;"	f
 main	examples/ndn-simple-with-pcap.cpp	/^main(int argc, char* argv[])$/;"	f	namespace:ns3
 main	examples/ndn-simple.cpp	/^main(int argc, char* argv[])$/;"	f
@@ -10686,6 +10703,8 @@ ndn	ndn-cxx/examples/producer.cpp	/^namespace ndn {$/;"	n	file:
 ndn	ndn-cxx/src/common.hpp	/^namespace ndn {$/;"	n
 ndn	ndn-cxx/src/data.cpp	/^namespace ndn {$/;"	n	file:
 ndn	ndn-cxx/src/data.hpp	/^namespace ndn {$/;"	n
+ndn	ndn-cxx/src/destination-flag.cpp	/^namespace ndn {$/;"	n	file:
+ndn	ndn-cxx/src/destination-flag.hpp	/^namespace ndn {$/;"	n
 ndn	ndn-cxx/src/detail/container-with-on-empty-signal.hpp	/^namespace ndn {$/;"	n
 ndn	ndn-cxx/src/detail/face-impl.hpp	/^namespace ndn {$/;"	n
 ndn	ndn-cxx/src/detail/interest-filter-record.hpp	/^namespace ndn {$/;"	n
@@ -11592,6 +11611,7 @@ ns3	examples/ndn-custom-apps/hijacker.cpp	/^namespace ns3 {$/;"	n	file:
 ns3	examples/ndn-custom-apps/hijacker.hpp	/^namespace ns3 {$/;"	n
 ns3	examples/ndn-cxx-simple.cpp	/^namespace ns3 {$/;"	n	file:
 ns3	examples/ndn-cxx-simple/real-app-starter.hpp	/^namespace ns3 {$/;"	n
+ns3	examples/ndn-four-node-link-failure.cpp	/^namespace ns3 {$/;"	n	file:
 ns3	examples/ndn-grid-topo-plugin-loss.cpp	/^namespace ns3 {$/;"	n	file:
 ns3	examples/ndn-grid-topo-plugin-red-queues.cpp	/^namespace ns3 {$/;"	n	file:
 ns3	examples/ndn-grid-topo-plugin.cpp	/^namespace ns3 {$/;"	n	file:
@@ -11602,7 +11622,6 @@ ns3	examples/ndn-simple-with-content-freshness.cpp	/^namespace ns3 {$/;"	n	file:
 ns3	examples/ndn-simple-with-content-freshness/one-interest-requester.cpp	/^namespace ns3 {$/;"	n	file:
 ns3	examples/ndn-simple-with-content-freshness/one-interest-requester.hpp	/^namespace ns3 {$/;"	n
 ns3	examples/ndn-simple-with-different-sizes-content-store.cpp	/^namespace ns3 {$/;"	n	file:
-ns3	examples/ndn-simple-with-link-failure.cpp	/^namespace ns3 {$/;"	n	file:
 ns3	examples/ndn-simple-with-pcap.cpp	/^namespace ns3 {$/;"	n	file:
 ns3	examples/ndn-simple.cpp	/^namespace ns3 {$/;"	n	file:
 ns3	examples/ndn-tree-app-delay-tracer.cpp	/^namespace ns3 {$/;"	n	file:
@@ -13330,6 +13349,7 @@ sessionid	NFD/websocketpp/examples/associative_storage/associative_storage.cpp	/
 sessionid	NFD/websocketpp/examples/enriched_storage/enriched_storage.cpp	/^    int sessionid;$/;"	m	struct:connection_data	file:
 set	NFD/daemon/face/face-counters.hpp	/^  set(rep value)$/;"	f	class:nfd::ByteCounter
 set	NFD/daemon/face/face-counters.hpp	/^  set(rep value)$/;"	f	class:nfd::PacketCounter
+set	ndn-cxx/src/destination-flag.cpp	/^DestinationFlag::set()$/;"	f	class:ndn::DestinationFlag
 set	ndn-cxx/src/lp/packet.hpp	/^  set(const typename FIELD::ValueType& value)$/;"	f	class:ndn::lp::Packet
 set	ndn-cxx/src/name.cpp	/^Name::set(const char* uri)$/;"	f	class:ndn::Name
 set	ndn-cxx/src/name.cpp	/^Name::set(const std::string& uri)$/;"	f	class:ndn::Name
@@ -13399,6 +13419,8 @@ setDefaultStrategy	NFD/daemon/table/strategy-choice.cpp	/^StrategyChoice::setDef
 setDefaultValue	ndn-cxx/tools/ndnsec/util.hpp	/^  setDefaultValue(const T& t)$/;"	f	class:AccumulatorType
 setDeleter	ndn-cxx/src/detail/pending-interest.hpp	/^  setDeleter(const std::function<void()>& deleter)$/;"	f	class:ndn::PendingInterest
 setDescription	NFD/daemon/face/face.hpp	/^Face::setDescription(const std::string& description)$/;"	f	class:nfd::Face
+setDestinationFlag	NFD/daemon/table/pit-entry.cpp	/^Entry::setDestinationFlag()$/;"	f	class:nfd::pit::Entry
+setDestinationFlag	ndn-cxx/src/interest.hpp	/^  setDestinationFlag()$/;"	f	class:ndn::Interest
 setDigestAlgorithm	ndn-cxx/src/security/signing-info.hpp	/^  setDigestAlgorithm(const DigestAlgorithm& algorithm)$/;"	f	class:ndn::security::SigningInfo
 setErrorRate	helper/ndn-link-control-helper.cpp	/^LinkControlHelper::setErrorRate(Ptr<Node> node1, Ptr<Node> node2, double errorRate)$/;"	f	class:ns3::ndn::LinkControlHelper
 setExclude	ndn-cxx/src/interest.hpp	/^  setExclude(const Exclude& exclude)$/;"	f	class:ndn::Interest
@@ -14951,6 +14973,7 @@ what	NFD/websocketpp/websocketpp/http/constants.hpp	/^        virtual const char
 wire	ndn-cxx/src/encoding/block.cpp	/^Block::wire() const$/;"	f	class:ndn::Block
 wireDecode	NFD/tests/core/simple-notification.hpp	/^  wireDecode(const Block& block)$/;"	f	class:nfd::tests::SimpleNotification
 wireDecode	ndn-cxx/src/data.cpp	/^Data::wireDecode(const Block& wire)$/;"	f	class:ndn::Data
+wireDecode	ndn-cxx/src/destination-flag.cpp	/^DestinationFlag::wireDecode(const Block& wire)$/;"	f	class:ndn::DestinationFlag
 wireDecode	ndn-cxx/src/exclude.cpp	/^Exclude::wireDecode(const Block& wire)$/;"	f	class:ndn::Exclude
 wireDecode	ndn-cxx/src/interest.cpp	/^Interest::wireDecode(const Block& wire)$/;"	f	class:ndn::Interest
 wireDecode	ndn-cxx/src/key-locator.cpp	/^KeyLocator::wireDecode(const Block& wire)$/;"	f	class:ndn::KeyLocator
@@ -14988,6 +15011,7 @@ wireEncode	NFD/tools/ndn-autoconfig-server.cpp	/^  wireEncode(EncodingImpl<T>& e
 wireEncode	ndn-cxx/src/data.cpp	/^Data::wireEncode() const$/;"	f	class:ndn::Data
 wireEncode	ndn-cxx/src/data.cpp	/^Data::wireEncode(EncodingBuffer& encoder, const Block& signatureValue) const$/;"	f	class:ndn::Data
 wireEncode	ndn-cxx/src/data.cpp	/^Data::wireEncode(EncodingImpl<TAG>& encoder, bool unsignedPortion\/* = false*\/) const$/;"	f	class:ndn::Data
+wireEncode	ndn-cxx/src/destination-flag.cpp	/^DestinationFlag::wireEncode(EncodingImpl<TAG>& encoder) const$/;"	f	class:ndn::DestinationFlag
 wireEncode	ndn-cxx/src/exclude.cpp	/^Exclude::wireEncode() const$/;"	f	class:ndn::Exclude
 wireEncode	ndn-cxx/src/exclude.cpp	/^Exclude::wireEncode(EncodingImpl<TAG>& encoder) const$/;"	f	class:ndn::Exclude
 wireEncode	ndn-cxx/src/interest.cpp	/^Interest::wireEncode() const$/;"	f	class:ndn::Interest

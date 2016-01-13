@@ -133,26 +133,40 @@ Forwarder::onContentStoreMiss(const Face& inFace,
   this->setUnsatisfyTimer(pitEntry);
 
   shared_ptr<fib::Entry> fibEntry;
+  shared_ptr<fib::Entry> sitEntry;
   // FIB lookup
   if(0 == interest.getDestinationFlag().getFlag())
   {
     fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
     //TODO add exact match lookup for SIT table
     if(m_fib.isEmpty(fibEntry)) { //check SIT table
-      fibEntry = m_sit.findExactMatch((*pitEntry).getName());         
-	   if(!m_sit.isEmpty(fibEntry))
+	   std::cout << "Checking SIT table for: "<<(*pitEntry).getName()<<" destination flag is 0\n";
+      sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
+	   if(static_cast<bool>(sitEntry))
+		{
+	     std::cout << "Found an entry for: "<<(*pitEntry).getName()<<" in the SIT table. destination flag is 0\n";
 	     (*pitEntry).setDestinationFlag(); 
+		  fibEntry = sitEntry;
+		}
     }
   }
   else
   {
-    fibEntry = m_sit.findExactMatch((*pitEntry).getName());         
-	 if(!m_sit.isEmpty(fibEntry))
+	 std::cout << "Checking SIT table for: "<<(*pitEntry).getName()<<" destination flag is 1\n";
+    sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
+	 if(!static_cast<bool>(sitEntry))
 	 {
       NFD_LOG_DEBUG("onContentStoreMiss: ERROR, no match in SIT table; this should not happen");
+		std::cout<<"ERROR no match in the SIT table for: "<<(*pitEntry).getName()<<" destination flag is 1\n";
 		//TODO send a NACK???
       fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
     }
+	 else
+	 {
+	   (*pitEntry).setDestinationFlag(); 
+	   std::cout << "Found an entry for: "<<(*pitEntry).getName()<<" in the SIT table. destination flag is 1\n";
+	   fibEntry = sitEntry;
+	 }
   }
 
   // dispatch to strategy
@@ -167,6 +181,8 @@ Forwarder::onContentStoreHit(const Face& inFace,
                              const Data& data)
 {
   NFD_LOG_DEBUG("onContentStoreHit interest=" << interest.getName());
+
+  std::cout <<"Content Store HIT for: "<< interest.getName()<<"\n";
 
   beforeSatisfyInterest(*pitEntry, *m_csFace, data);
   this->dispatchToStrategy(pitEntry, bind(&Strategy::beforeSatisfyInterest, _1,
@@ -387,6 +403,7 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
   shared_ptr<fib::Entry> sitEntry = m_sit.findExactMatch(data.getName());
   if(!static_cast<bool>(sitEntry))
   {
+    std::cout<<"Inserting sitEntry: "<<data.getName()<<"\n";
     sitEntry = m_sit.insert(data.getName()).first;
   }
 

@@ -177,7 +177,24 @@ Consumer::SendPacket()
       }
     }
 
-    seq = m_seq++;
+	 //seq = m_seq++; 
+	 //Onur Start
+    seq = m_seq;
+    m_seq = m_seq + 2;
+	 if(seq >= 20)
+	 {
+      if(seq % 2) //odd sequence
+		{
+			seq = 0;
+			m_seq = 2;
+		}
+		else
+		{
+			seq = 1;
+			m_seq = 3;
+		}
+	 }
+	 //Onur End
   }
 
   //

@@ -20,6 +20,7 @@
 #include "ndn-app-helper.hpp"
 #include "ns3/log.h"
 #include "ns3/string.h"
+#include "ns3/integer.h"
 #include "ns3/names.h"
 
 #include "apps/ndn-app.hpp"
@@ -42,6 +43,12 @@ void
 AppHelper::SetPrefix(const std::string& prefix)
 {
   m_factory.Set("Prefix", StringValue(prefix));
+}
+
+void
+AppHelper::SetStartSeq(const int seq)
+{
+  m_factory.Set("StartSeq", IntegerValue(seq));
 }
 
 void

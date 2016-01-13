@@ -155,6 +155,12 @@ BestRouteStrategy2::afterReceiveInterest(const Face& inFace,
                            << " retransmit-retry-to=" << outFace->getId());
   }
 }
+/*
+void
+BestRouteStrategy2::beforeExpirePendingInterest(shared_ptr<pit::Entry> pitEntry)
+{
+
+}*/
 
 } // namespace fw
 } // namespace nfd

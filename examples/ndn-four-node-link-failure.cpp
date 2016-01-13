@@ -27,6 +27,10 @@
 // for LinkStatusControl::FailLinks and LinkStatusControl::UpLinks
 #include "ns3/ndnSIM/helper/ndn-link-control-helper.hpp"
 
+// for removing fib entries
+#include "ns3/ndnSIM/helper/ndn-fib-helper.hpp"
+
+
 namespace ns3 {
 
 /**
@@ -36,20 +40,20 @@ namespace ns3 {
  *      +----------+     1Mbps      +---------+      1Mbps   +---------+     1Mbps      +----------+
  *      | consumer1| <------------> | router1 | <----------->| router2 | <------------> | producer |
  *      +----------+     10ms       +---------+      10ms    +---------+     10ms       +----------+
- *                                       ^
- *                                       |
- *                                       |
- *                                       v
- *                                  +---------+
- *                                  | router3 | (4)
- *                                  +---------+
- *                                       ^
- *                                       |
- *                                       |
- *                                       v
- *                                  +----------+
- *                                  | consumer2| (3)
- *                                  +----------+
+ *                                                                ^
+ *                                                                |
+ *                                                                |
+ *                                                                v
+ *                                                           +---------+
+ *                                                           | router3 | (4)
+ *                                                           +---------+
+ *                                                                ^
+ *                                                                |
+ *                                                                |
+ *                                                                v
+ *                                                          +----------+
+ *                                                          | consumer2| (3)
+ *                                                          +----------+
  *
  *
  * Consumer requests data from producer with frequency 10 interests per second
@@ -84,13 +88,25 @@ main(int argc, char* argv[])
   p2p.Install(nodes.Get(0), nodes.Get(1));
   p2p.Install(nodes.Get(1), nodes.Get(5));
   p2p.Install(nodes.Get(5), nodes.Get(2));
-  p2p.Install(nodes.Get(1), nodes.Get(4));
+  p2p.Install(nodes.Get(5), nodes.Get(4));
   p2p.Install(nodes.Get(4), nodes.Get(3));
 
   // Install NDN stack on all nodes
-  ndn::StackHelper ndnHelper;
+  ndn::StackHelper ndnHelperCaching;
+  ndnHelperCaching.SetOldContentStore("ns3::ndn::cs::Lru", "MaxSize", "10000");
+  //Edge caching (install on nodes 1 and 4) Note: There is NFD running on nodes 0 and 3 as well!
+  ndnHelperCaching.Install(nodes.Get(1));
+  ndnHelperCaching.Install(nodes.Get(4));
+
+  ndn::StackHelper ndnHelperNoCaching;
+  ndnHelperNoCaching.SetOldContentStore("ns3::ndn::cs::Nocache");
+  ndnHelperNoCaching.Install(nodes.Get(0));
+  ndnHelperNoCaching.Install(nodes.Get(5));
+  ndnHelperNoCaching.Install(nodes.Get(2));
+  ndnHelperNoCaching.Install(nodes.Get(3));
+
   //ndnHelper.SetDefaultRoutes(true);
-  ndnHelper.InstallAll();
+  //ndnHelper.InstallAll();
 
    // Set BestRoute strategy
   ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/best-route");
@@ -107,15 +123,17 @@ main(int argc, char* argv[])
   ndn::AppHelper consumerHelper1("ns3::ndn::ConsumerCbr");
   // Consumer will request /prefix/0, /prefix/1, ...
   consumerHelper1.SetPrefix(prefix);
-  consumerHelper1.SetAttribute("Frequency", StringValue("10")); // 10 interests a second
-  consumerHelper1.Install(nodes.Get(0));                        // first node
+  consumerHelper1.SetAttribute("Frequency", StringValue("1")); // 10 interests a second
+  consumerHelper1.SetAttribute("StartSeq", IntegerValue(1));
+  consumerHelper1.Install(nodes.Get(0));                        // node 0
 
   // Consumer 2
   ndn::AppHelper consumerHelper2("ns3::ndn::ConsumerCbr");
   // Consumer will request /prefix/0, /prefix/1, ...
   consumerHelper2.SetPrefix(prefix);
-  consumerHelper2.SetAttribute("Frequency", StringValue("10")); // 10 interests a second
-  consumerHelper2.Install(nodes.Get(3));                        // fourth node
+  consumerHelper2.SetAttribute("Frequency", StringValue("1")); // 10 interests a second
+  consumerHelper1.SetAttribute("StartSeq", IntegerValue(0));
+  consumerHelper2.Install(nodes.Get(3));                        // node 3
 
   // Producer
   ndn::AppHelper producerHelper("ns3::ndn::Producer");
@@ -126,8 +144,11 @@ main(int argc, char* argv[])
   Ptr<Node> producer = nodes.Get(2);
 
   // The failure of the link connecting consumer and router will start from seconds 10.0 to 15.0
-  Simulator::Schedule(Seconds(10.0), ndn::LinkControlHelper::FailLink, nodes.Get(1), nodes.Get(5));
-  Simulator::Schedule(Seconds(15.0), ndn::LinkControlHelper::UpLink, nodes.Get(1), nodes.Get(5));
+  //Simulator::Schedule(Seconds(10.0), ndn::LinkControlHelper::FailLink, nodes.Get(2), nodes.Get(5));
+  //Simulator::Schedule(Seconds(15.0), ndn::LinkControlHelper::UpLink, nodes.Get(2), nodes.Get(5));
+
+  const ndn::Name n("ndn://" + prefix); 
+  std::cout<<n<<"\n";
 
   // Add /prefix origins to ndn::GlobalRouter
   ndnGlobalRoutingHelper.AddOrigins(prefix, producer);
@@ -135,6 +156,9 @@ main(int argc, char* argv[])
   // Calculate and install FIBs
   ndn::GlobalRoutingHelper::CalculateRoutes();
 
+  Simulator::Schedule(Seconds(10.0), (void (*)(Ptr<Node>, const ndn::Name&, Ptr<Node>)) (&ndn::FibHelper::RemoveRoute), nodes.Get(5), n, nodes.Get(2));
+
+  //ndn::FibHelper::RemoveRoute(nodes.Get(5), n, nodes.Get(2));
   Simulator::Stop(Seconds(20.0));
 
   Simulator::Run();
