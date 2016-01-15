@@ -31,6 +31,7 @@
 #include "forwarder-counters.hpp"
 #include "face-table.hpp"
 #include "table/fib.hpp"
+#include "table/cfib.hpp"
 #include "table/pit.hpp"
 #include "table/cs.hpp"
 #include "table/measurements.hpp"
@@ -225,7 +226,7 @@ private:
   NameTree       m_nameTree_sit; //nameTree for the SIT table
   Fib            m_fib;
   Pit            m_pit;
-  Fib            m_sit;
+  Cfib           m_sit;
   Cs             m_cs;
   Measurements   m_measurements;
   StrategyChoice m_strategyChoice;
