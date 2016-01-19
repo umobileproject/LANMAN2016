@@ -2,12 +2,13 @@
 #include "destination-flag.hpp"
 
 namespace ndn {
-
+/*
 template<encoding::Tag TAG>
 size_t
 DestinationFlag::wireEncode(EncodingImpl<TAG>& encoder) const
 {
   size_t totalLength = prependNonNegativeIntegerBlock(encoder, tlv::DestinationFlag, m_flag);
+  std::cout << "Encoding destination flag before send. Its value is: "<< m_flag <<"\n";
   return totalLength;
 }
 
@@ -25,18 +26,20 @@ DestinationFlag::wireDecode(const Block& wire)
 
   m_dfBlock = wire;
   m_flag = readNonNegativeInteger(wire);
+  std::cout << "Decocoding destination flag after recv. Its value is: "<< m_flag <<"\n";
 }
 
 uint64_t
 DestinationFlag::getFlag() const
 {
   return m_flag;
-}
+}*/
 
 void
-DestinationFlag::set()
+DestinationFlag::set(uint32_t val)
 {
-  m_flag = 1;
+  if(val >= 0)
+    m_flag = val;
 }
 
 void 
@@ -44,5 +47,17 @@ DestinationFlag::clear()
 {
   m_flag = 0;
 }
+
+uint32_t
+DestinationFlag::get()
+{
+  return m_flag;
+}
+
+/*mutable Block & 
+getDestinationFlagBlock()
+{
+  return m_dfBlock;
+}*/
 
 } // namespace ndn

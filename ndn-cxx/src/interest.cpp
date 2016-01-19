@@ -264,7 +264,10 @@ Interest::wireEncode(EncodingImpl<TAG>& encoder) const
   totalLength += getName().wireEncode(encoder);
 
   // Destination Flag
-  totalLength += getDestinationFlag().wireEncode(encoder);
+  getDestinationFlag();
+  totalLength += encoder.prependBlock(m_dfBlock);
+  //totalLength += getDestinationFlag().wireEncode(encoder);
+
 
   totalLength += encoder.prependVarNumber(totalLength);
   totalLength += encoder.prependVarNumber(tlv::Interest);
@@ -314,7 +317,8 @@ Interest::wireDecode(const Block& wire)
     BOOST_THROW_EXCEPTION(Error("Unexpected TLV number when decoding Interest"));
 
   // Destination Flag
-  m_destinationFlag.wireDecode(m_wire.get(tlv::DestinationFlag));
+  m_dfBlock = m_wire.get(tlv::DestinationFlag);
+  //m_destinationFlag.wireDecode(m_wire.get(tlv::DestinationFlag));
 
   // Name
   m_name.wireDecode(m_wire.get(tlv::Name));

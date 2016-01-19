@@ -95,15 +95,15 @@ main(int argc, char* argv[])
   ndn::StackHelper ndnHelperCaching;
   ndnHelperCaching.SetOldContentStore("ns3::ndn::cs::Lru", "MaxSize", "10000");
   //Edge caching (install on nodes 1 and 4) Note: There is NFD running on nodes 0 and 3 as well!
-  ndnHelperCaching.Install(nodes.Get(1));
-  ndnHelperCaching.Install(nodes.Get(4));
+  ndnHelperCaching.Install(nodes.Get(0));
+  ndnHelperCaching.Install(nodes.Get(3));
 
   ndn::StackHelper ndnHelperNoCaching;
   ndnHelperNoCaching.SetOldContentStore("ns3::ndn::cs::Nocache");
-  ndnHelperNoCaching.Install(nodes.Get(0));
+  ndnHelperNoCaching.Install(nodes.Get(1));
   ndnHelperNoCaching.Install(nodes.Get(5));
   ndnHelperNoCaching.Install(nodes.Get(2));
-  ndnHelperNoCaching.Install(nodes.Get(3));
+  ndnHelperNoCaching.Install(nodes.Get(4));
 
   //ndnHelper.SetDefaultRoutes(true);
   //ndnHelper.InstallAll();

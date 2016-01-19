@@ -14,7 +14,7 @@ public:
    * @brief Create a new Destination Flag with no components.
    */
   DestinationFlag()
-  : m_dfBlock(tlv::DestinationFlag) 
+  //: m_dfBlock(tlv::DestinationFlag) 
   {
     m_flag = 0;
   }
@@ -28,25 +28,30 @@ public:
   RoutingName(std::string name);
 	*/
 
-  template<encoding::Tag TAG>
-  size_t
-  wireEncode(EncodingImpl<TAG>& encoder) const;
+  //template<encoding::Tag TAG>
+  //size_t
+  //wireEncode(EncodingImpl<TAG>& encoder) const;
 
-  void
-  wireDecode(const Block& wire);
+  //void
+  //wireDecode(const Block& wire);
 
-  uint64_t
-  getFlag() const;
+  //uint64_t
+  //getFlag() const;
+  
+  uint32_t 
+  get();
 
   void 
-  set();
+  set(uint32_t val);
 
   void
   clear();
+  
+  //mutable Block & 
+  //getDestinationFlagBlock()
 
 private:
-  mutable Block m_dfBlock;
-  uint64_t m_flag;
+  uint32_t m_flag;
 };
 
 } // namespace ndn

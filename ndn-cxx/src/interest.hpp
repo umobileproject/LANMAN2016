@@ -228,18 +228,36 @@ public: // Name and guiders
   }
   
   Interest&
-  setDestinationFlag()
+  setDestinationFlag(uint32_t val)
   {
-     m_destinationFlag.set();
-     return *this;
+    if(val > 0)
+      m_destinationFlag.set(val);
+
+    uint32_t flag = m_destinationFlag.get();
+
+    if(m_wire.hasWire() && m_dfBlock.value_size() == sizeof(uint32_t))
+	 {
+      std::memcpy(const_cast<uint8_t*>(m_dfBlock.value()), &flag, sizeof(uint32_t)); 
+	 }
+	 else
+	 {
+      m_dfBlock = makeBinaryBlock(tlv::DestinationFlag, 
+		                            reinterpret_cast<const uint8_t*>(&flag),
+											 sizeof(uint32_t));
+		m_wire.reset();
+	 }
+    return *this;
   }
 
-  const DestinationFlag&
+  uint32_t
   getDestinationFlag() const
   {
-    return m_destinationFlag;
+    if (!m_dfBlock.hasWire())
+      const_cast<Interest*>(this)->setDestinationFlag(0);
+    
+    return readNonNegativeInteger(m_dfBlock);
   }
-
+  
   const time::milliseconds&
   getInterestLifetime() const
   {
@@ -454,6 +472,7 @@ private:
   DestinationFlag m_destinationFlag;
   Selectors m_selectors;
   mutable Block m_nonce;
+  mutable Block m_dfBlock;
   time::milliseconds m_interestLifetime;
 
   mutable Block m_link;

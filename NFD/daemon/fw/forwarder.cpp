@@ -45,7 +45,7 @@ Forwarder::Forwarder()
   : m_faceTable(*this)
   , m_fib(m_nameTree)
   , m_pit(m_nameTree)
-  , m_sit(m_nameTree_sit, 10)
+  , m_sit(m_nameTree_sit, 20)
   , m_measurements(m_nameTree)
   , m_strategyChoice(m_nameTree, fw::makeDefaultStrategy(*this))
   , m_csFace(make_shared<NullFace>(FaceUri("contentstore://")))
@@ -135,8 +135,9 @@ Forwarder::onContentStoreMiss(const Face& inFace,
   shared_ptr<fib::Entry> fibEntry;
   shared_ptr<fib::Entry> sitEntry;
   // FIB lookup
-  if(0 == interest.getDestinationFlag().getFlag())
+  if(0 == interest.getDestinationFlag())
   {
+    std::cout << "Checking FIB table for: " <<(*pitEntry).getName()<<" destination flag is 0\n";
     fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
     //TODO add exact match lookup for SIT table
     if(m_fib.isEmpty(fibEntry)) { //check SIT table
@@ -150,7 +151,7 @@ Forwarder::onContentStoreMiss(const Face& inFace,
 		}
     }
   }
-  else
+  else //flag == 1
   {
 	 std::cout << "Checking SIT table for: "<<(*pitEntry).getName()<<" destination flag is 1\n";
     sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
@@ -268,7 +269,8 @@ Forwarder::onOutgoingInterest(shared_ptr<pit::Entry> pitEntry, Face& outFace,
 
   if(pitEntry->getDestinationFlag())
   { //set the destination flag in the Interest packet
-    interest->setDestinationFlag();
+    interest->setDestinationFlag(1);
+	 std::cout << "Setting the destination Flag in the out-going interest packet: "<< pitEntry->getName() << "\n"; 
   }
 
   // insert OutRecord
