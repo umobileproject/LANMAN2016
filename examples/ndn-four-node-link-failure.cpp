@@ -31,6 +31,13 @@
 #include "ns3/ndnSIM/helper/ndn-fib-helper.hpp"
 
 
+#include "ns3/ndnSIM/apps/ndn-consumer.hpp"
+#include "ns3/ndnSIM/apps/ndn-consumer-cbr.hpp"
+
+#include "ns3/application.h"
+
+#include "ns3/ptr.h"
+
 namespace ns3 {
 
 /**
@@ -125,7 +132,8 @@ main(int argc, char* argv[])
   consumerHelper1.SetPrefix(prefix);
   consumerHelper1.SetAttribute("Frequency", StringValue("1")); // 10 interests a second
   consumerHelper1.SetAttribute("StartSeq", IntegerValue(1));
-  consumerHelper1.Install(nodes.Get(0));                        // node 0
+  ApplicationContainer appcontainer1 = consumerHelper1.Install(nodes.Get(0));                        // node 0
+  Ptr<Application> consumer_app1 = appcontainer1.Get(0);
 
   // Consumer 2
   ndn::AppHelper consumerHelper2("ns3::ndn::ConsumerCbr");
@@ -157,6 +165,9 @@ main(int argc, char* argv[])
   ndn::GlobalRoutingHelper::CalculateRoutes();
 
   Simulator::Schedule(Seconds(10.0), (void (*)(Ptr<Node>, const ndn::Name&, Ptr<Node>)) (&ndn::FibHelper::RemoveRoute), nodes.Get(5), n, nodes.Get(2));
+  ns3::Application *app_ptr = PeekPointer(consumer_app1);
+  ndn::ConsumerCbr *cons = reinterpret_cast<ndn::ConsumerCbr *>(app_ptr);
+  Simulator::Schedule(Seconds(2.5), &ndn::Consumer::SendPacket, cons);
 
   //ndn::FibHelper::RemoveRoute(nodes.Get(5), n, nodes.Get(2));
   Simulator::Stop(Seconds(20.0));
