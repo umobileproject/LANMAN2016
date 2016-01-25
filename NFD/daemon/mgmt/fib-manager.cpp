@@ -236,52 +236,73 @@ FibManager::removeNextHop(ControlParameters& parameters,
   NFD_LOG_TRACE("remove-nexthop prefix: " << parameters.getName()
                 << " faceid: " << parameters.getFaceId());
 
-  shared_ptr<Face> faceToRemove = m_getFace(parameters.getFaceId());
-  if (static_cast<bool>(faceToRemove))
-    {
-      shared_ptr<fib::Entry> entry = m_managedFib.findExactMatch(parameters.getName());
-      if (static_cast<bool>(entry))
-        {
-          entry->removeNextHop(faceToRemove);
-          NFD_LOG_DEBUG("remove-nexthop result: OK prefix: " << parameters.getName()
-                        << " faceid: " << parameters.getFaceId());
-
-          if (!entry->hasNextHops())
-            {
-              m_managedFib.erase(*entry);
-            }
-        }
-      else
-        {
-          NFD_LOG_DEBUG("remove-nexthop result: OK, but entry for face id "
-                        << parameters.getFaceId() << " not found");
-        }
-      //Remove SIT entry   
-      shared_ptr<fib::Entry> sitentry = m_managedSit.findExactMatch(parameters.getName());
-      if (static_cast<bool>(sitentry))
-        {
-          sitentry->removeNextHop(faceToRemove);
-          NFD_LOG_DEBUG("remove-nexthop result: OK prefix: " << parameters.getName()
-                        << " faceid: " << parameters.getFaceId());
-
-          if (!sitentry->hasNextHops())
-            {
-              m_managedSit.erase(*sitentry);
-            }
-        }
-      else
-        {
-          NFD_LOG_DEBUG("remove-nexthop result: OK, but entry for face id "
-                        << parameters.getFaceId() << " not found");
-        }
-    }
-  else
-    {
-      NFD_LOG_DEBUG("remove-nexthop result: OK, but face id "
+  if(parameters.getFaceId() == 999)
+  {
+    std::cout<<"Removing SIT entry in fib-manager\n";
+    shared_ptr<fib::Entry> sitentry = m_managedSit.findExactMatch(parameters.getName());
+    if (static_cast<bool>(sitentry))
+      { //erase the entry
+        m_managedSit.erase(*sitentry);
+      }
+    else
+      {
+        NFD_LOG_DEBUG("remove-nexthop result: OK, but entry for face id "
                     << parameters.getFaceId() << " not found");
-    }
+      }
+    //Remove SIT entry   
 
-  setResponse(response, 200, "Success", parameters.wireEncode());
+	 
+	 setResponse(response, 200, "Success", parameters.wireEncode());
+  }
+  else
+  {
+    shared_ptr<Face> faceToRemove = m_getFace(parameters.getFaceId());
+    if (static_cast<bool>(faceToRemove))
+      {
+        shared_ptr<fib::Entry> entry = m_managedFib.findExactMatch(parameters.getName());
+        if (static_cast<bool>(entry))
+          {
+            entry->removeNextHop(faceToRemove);
+            NFD_LOG_DEBUG("remove-nexthop result: OK prefix: " << parameters.getName()
+                        << " faceid: " << parameters.getFaceId());
+
+            if (!entry->hasNextHops())
+              {
+                m_managedFib.erase(*entry);
+              }
+          }
+        else
+          {
+            NFD_LOG_DEBUG("remove-nexthop result: OK, but entry for face id "
+                        << parameters.getFaceId() << " not found");
+          }
+        //Remove SIT entry   
+        shared_ptr<fib::Entry> sitentry = m_managedSit.findExactMatch(parameters.getName());
+        if (static_cast<bool>(sitentry))
+          {
+            sitentry->removeNextHop(faceToRemove);
+            NFD_LOG_DEBUG("remove-nexthop result: OK prefix: " << parameters.getName()
+                          << " faceid: " << parameters.getFaceId());
+
+            if (!sitentry->hasNextHops())
+              {
+                m_managedSit.erase(*sitentry);
+              }
+          }
+        else
+          {
+            NFD_LOG_DEBUG("remove-nexthop result: OK, but entry for face id "
+                        << parameters.getFaceId() << " not found");
+          }  
+      }
+    else
+      {
+        NFD_LOG_DEBUG("remove-nexthop result: OK, but face id "
+                      << parameters.getFaceId() << " not found");
+      }
+
+    setResponse(response, 200, "Success", parameters.wireEncode());
+  }
 }
 
 void

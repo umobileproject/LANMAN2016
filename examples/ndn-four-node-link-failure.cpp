@@ -33,6 +33,7 @@
 // for scheduling application-level events (e.g., SendPacket)
 #include "ns3/ndnSIM/apps/ndn-consumer.hpp"
 #include "ns3/ndnSIM/apps/ndn-consumer-cbr.hpp"
+#include "ns3/ndnSIM/apps/ndn-consumer-sit.hpp"
 #include "ns3/application.h"
 #include "ns3/ptr.h"
 
@@ -100,8 +101,9 @@ main(int argc, char* argv[])
   ndn::StackHelper ndnHelperCaching;
   ndnHelperCaching.SetOldContentStore("ns3::ndn::cs::Lru", "MaxSize", "10000");
   //Edge caching (install on nodes 1 and 4) Note: There is NFD running on nodes 0 and 3 as well!
-  ndnHelperCaching.Install(nodes.Get(0));
-  ndnHelperCaching.Install(nodes.Get(3));
+  
+  //ndnHelperCaching.Install(nodes.Get(0));
+  //ndnHelperCaching.Install(nodes.Get(3));
 
   ndn::StackHelper ndnHelperNoCaching;
   ndnHelperNoCaching.SetOldContentStore("ns3::ndn::cs::Nocache");
@@ -109,6 +111,8 @@ main(int argc, char* argv[])
   ndnHelperNoCaching.Install(nodes.Get(5));
   ndnHelperNoCaching.Install(nodes.Get(2));
   ndnHelperNoCaching.Install(nodes.Get(4));
+  ndnHelperNoCaching.Install(nodes.Get(0));
+  ndnHelperNoCaching.Install(nodes.Get(3));
 
   //ndnHelper.SetDefaultRoutes(true);
   //ndnHelper.InstallAll();
@@ -125,7 +129,7 @@ main(int argc, char* argv[])
   std::string prefix = "/prefix";
 
   // Consumer 1
-  ndn::AppHelper consumerHelper1("ns3::ndn::ConsumerCbr");
+  ndn::AppHelper consumerHelper1("ns3::ndn::ConsumerSit");
   // Consumer will request /prefix/0, /prefix/1, ...
   consumerHelper1.SetPrefix(prefix);
   consumerHelper1.SetAttribute("Frequency", StringValue("1")); // 10 interests a second
@@ -134,12 +138,13 @@ main(int argc, char* argv[])
   Ptr<Application> consumer_app1 = appcontainer1.Get(0);
 
   // Consumer 2
-  ndn::AppHelper consumerHelper2("ns3::ndn::ConsumerCbr");
+  ndn::AppHelper consumerHelper2("ns3::ndn::ConsumerSit");
   // Consumer will request /prefix/0, /prefix/1, ...
   consumerHelper2.SetPrefix(prefix);
   consumerHelper2.SetAttribute("Frequency", StringValue("1")); // 10 interests a second
-  consumerHelper1.SetAttribute("StartSeq", IntegerValue(0));
-  consumerHelper2.Install(nodes.Get(3));                        // node 3
+  consumerHelper2.SetAttribute("StartSeq", IntegerValue(0));
+  ApplicationContainer appcontainer2 = consumerHelper2.Install(nodes.Get(3));                        // node 3
+  Ptr<Application> consumer_app2 = appcontainer2.Get(0);
 
   // Producer
   ndn::AppHelper producerHelper("ns3::ndn::Producer");
@@ -161,12 +166,31 @@ main(int argc, char* argv[])
 
   // Calculate and install FIBs
   ndn::GlobalRoutingHelper::CalculateRoutes();
-
-  Simulator::Schedule(Seconds(10.0), (void (*)(Ptr<Node>, const ndn::Name&, Ptr<Node>)) (&ndn::FibHelper::RemoveRoute), nodes.Get(5), n, nodes.Get(2));
-  //ns3::Application *app_ptr = PeekPointer(consumer_app1);
+  
+  // consumer app1 sends an interest for 12 at time 2
   ns3::Application *app_ptr = GetPointer(consumer_app1);
-  ndn::ConsumerCbr *cons = reinterpret_cast<ndn::ConsumerCbr *>(app_ptr);
-  Simulator::Schedule(Seconds(2.5), &ndn::Consumer::SendPacket, cons);
+  ndn::ConsumerSit *cons = reinterpret_cast<ndn::ConsumerSit *>(app_ptr);
+  Simulator::Schedule(Seconds(2.0), &ndn::Consumer::SendPacketWithSeq, cons, 12);
+
+
+  //Remove FIB and SIT to disconnect the Producer at time 4
+  Simulator::Schedule(Seconds(4.0), (void (*)(Ptr<Node>, const ndn::Name&, Ptr<Node>)) (&ndn::FibHelper::RemoveRoute), nodes.Get(5), n, nodes.Get(2));
+
+  // consumer app2 sends an interest for 12 at time 6
+  app_ptr = GetPointer(consumer_app2);
+  cons = reinterpret_cast<ndn::ConsumerSit *>(app_ptr);
+  Simulator::Schedule(Seconds(6.0), &ndn::Consumer::SendPacketWithSeq, cons, 12);
+  
+  ndn::Name n1("ndn://" + prefix); 
+  n1.appendSequenceNumber(12);
+  std::cout<<n1<<"\n";
+  //Remove the SIT table entry from app1 (node 0's)  SIT entry
+  Simulator::Schedule(Seconds(8.0), (void (*)(Ptr<Node>, const ndn::Name&)) (&ndn::FibHelper::RemoveRoute), nodes.Get(0), n1);
+
+  // consumer app2 sends an interest for 12 at time 6
+  app_ptr = GetPointer(consumer_app2);
+  cons = reinterpret_cast<ndn::ConsumerSit *>(app_ptr);
+  Simulator::Schedule(Seconds(10.0), &ndn::Consumer::SendPacketWithSeq, cons, 12);
 
   //ndn::FibHelper::RemoveRoute(nodes.Get(5), n, nodes.Get(2));
   Simulator::Stop(Seconds(20.0));
