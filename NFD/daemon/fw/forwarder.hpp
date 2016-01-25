@@ -93,6 +93,9 @@ public: // forwarding entrypoints and tables
 
   Fib&
   getFib();
+  
+  Cfib&
+  getSit();
 
   Pit&
   getPit();
@@ -287,6 +290,12 @@ inline Fib&
 Forwarder::getFib()
 {
   return m_fib;
+}
+
+inline Cfib&
+Forwarder::getSit()
+{
+  return m_sit;
 }
 
 inline Pit&

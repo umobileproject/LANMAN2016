@@ -75,12 +75,14 @@ const Name FibManager::LIST_COMMAND_PREFIX("/localhost/nfd/fib/list");
 const size_t FibManager::LIST_COMMAND_NCOMPS = LIST_COMMAND_PREFIX.size();
 
 
-FibManager::FibManager(Fib& fib,
+FibManager::FibManager(Fib& fib, 
+                       Cfib& sit,
                        function<shared_ptr<Face>(FaceId)> getFace,
                        shared_ptr<InternalFace> face,
                        ndn::KeyChain& keyChain)
   : ManagerBase(face, FIB_PRIVILEGE, keyChain)
   , m_managedFib(fib)
+  , m_managedSit(sit)
   , m_getFace(getFace)
   , m_fibEnumerationPublisher(fib, *face, LIST_COMMAND_PREFIX, keyChain)
   , m_signedVerbDispatch(SIGNED_COMMAND_VERBS,
@@ -247,6 +249,24 @@ FibManager::removeNextHop(ControlParameters& parameters,
           if (!entry->hasNextHops())
             {
               m_managedFib.erase(*entry);
+            }
+        }
+      else
+        {
+          NFD_LOG_DEBUG("remove-nexthop result: OK, but entry for face id "
+                        << parameters.getFaceId() << " not found");
+        }
+      //Remove SIT entry   
+      shared_ptr<fib::Entry> sitentry = m_managedSit.findExactMatch(parameters.getName());
+      if (static_cast<bool>(sitentry))
+        {
+          sitentry->removeNextHop(faceToRemove);
+          NFD_LOG_DEBUG("remove-nexthop result: OK prefix: " << parameters.getName()
+                        << " faceid: " << parameters.getFaceId());
+
+          if (!sitentry->hasNextHops())
+            {
+              m_managedSit.erase(*sitentry);
             }
         }
       else

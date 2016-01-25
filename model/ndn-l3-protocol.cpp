@@ -228,6 +228,7 @@ L3Protocol::initializeManagement()
   m_impl->m_internalFace = make_shared<InternalFace>();
 
   m_impl->m_fibManager = make_shared<FibManager>(std::ref(forwarder->getFib()),
+                                                 std::ref(forwarder->getSit()),
                                                  bind(&Forwarder::getFace, forwarder.get(), _1),
                                                  m_impl->m_internalFace, keyChain);
 

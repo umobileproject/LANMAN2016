@@ -130,6 +130,7 @@ Nfd::initializeManagement()
   m_internalFace = make_shared<InternalFace>();
 
   m_fibManager.reset(new FibManager(m_forwarder->getFib(),
+                                    m_forwarder->getSit(),
                                     bind(&Forwarder::getFace, m_forwarder.get(), _1),
                                     m_internalFace, m_keyChain));
 

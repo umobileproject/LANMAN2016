@@ -29,6 +29,9 @@
 #include "common.hpp"
 #include "mgmt/manager-base.hpp"
 #include "mgmt/fib-enumeration-publisher.hpp"
+#include "common.hpp"
+#include "table/cfib.hpp"
+
 
 namespace nfd {
 
@@ -43,6 +46,7 @@ class FibManager : public ManagerBase
 public:
 
   FibManager(Fib& fib,
+             Cfib& sit,
              function<shared_ptr<Face>(FaceId)> getFace,
              shared_ptr<InternalFace> face,
              ndn::KeyChain& keyChain);
@@ -72,6 +76,7 @@ private:
 private:
 
   Fib& m_managedFib;
+  Cfib& m_managedSit;
   function<shared_ptr<Face>(FaceId)> m_getFace;
   FibEnumerationPublisher m_fibEnumerationPublisher;
 
