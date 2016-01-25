@@ -91,6 +91,7 @@ RocketfuelWeightsReader::Read()
   topgen.open(GetFileName().c_str());
 
   if (!topgen.is_open()) {
+    std::cout << "Cannot open file " << GetFileName() << " for reading\n";
     NS_LOG_ERROR("Cannot open file " << GetFileName() << " for reading");
     return m_nodes;
   }

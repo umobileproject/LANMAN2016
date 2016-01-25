@@ -69,6 +69,16 @@ ConsumerZipfMandelbrot::ConsumerZipfMandelbrot()
   // SetNumberOfContents is called by NS-3 object system during the initialization
 }
 
+ConsumerZipfMandelbrot::ConsumerZipfMandelbrot(uint32_t num_contents, double q, double s)
+  : m_N(num_contents) // needed here to make sure when SetQ/SetS are called, there is a valid value of N
+  , m_q(q)
+  , m_s(s)
+  , m_seqRng(CreateObject<UniformRandomVariable>())
+{
+  // SetNumberOfContents is called by NS-3 object system during the initialization
+  SetNumberOfContents(num_contents);
+}
+
 ConsumerZipfMandelbrot::~ConsumerZipfMandelbrot()
 {
 }

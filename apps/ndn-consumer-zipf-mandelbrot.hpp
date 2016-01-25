@@ -59,6 +59,7 @@ public:
    * Note: m_seq of its parent class ConsumerCbr here is used to record the interest number
    */
   ConsumerZipfMandelbrot();
+  ConsumerZipfMandelbrot(uint32_t num_contents, double q, double s);
   virtual ~ConsumerZipfMandelbrot();
 
   virtual void

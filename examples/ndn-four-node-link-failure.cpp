@@ -30,12 +30,10 @@
 // for removing fib entries
 #include "ns3/ndnSIM/helper/ndn-fib-helper.hpp"
 
-
+// for scheduling application-level events (e.g., SendPacket)
 #include "ns3/ndnSIM/apps/ndn-consumer.hpp"
 #include "ns3/ndnSIM/apps/ndn-consumer-cbr.hpp"
-
 #include "ns3/application.h"
-
 #include "ns3/ptr.h"
 
 namespace ns3 {
@@ -165,7 +163,8 @@ main(int argc, char* argv[])
   ndn::GlobalRoutingHelper::CalculateRoutes();
 
   Simulator::Schedule(Seconds(10.0), (void (*)(Ptr<Node>, const ndn::Name&, Ptr<Node>)) (&ndn::FibHelper::RemoveRoute), nodes.Get(5), n, nodes.Get(2));
-  ns3::Application *app_ptr = PeekPointer(consumer_app1);
+  //ns3::Application *app_ptr = PeekPointer(consumer_app1);
+  ns3::Application *app_ptr = GetPointer(consumer_app1);
   ndn::ConsumerCbr *cons = reinterpret_cast<ndn::ConsumerCbr *>(app_ptr);
   Simulator::Schedule(Seconds(2.5), &ndn::Consumer::SendPacket, cons);
 

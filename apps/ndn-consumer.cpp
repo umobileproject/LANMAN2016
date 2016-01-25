@@ -220,6 +220,75 @@ Consumer::SendPacket()
   ScheduleNextPacket();
 }
 
+void
+Consumer::SendPacketWithSeq(uint32_t seq)
+{
+  if (!m_active)
+    return;
+
+  NS_LOG_FUNCTION_NOARGS();
+
+/* Onur: Retransmission is Disabled
+  uint32_t seq = std::numeric_limits<uint32_t>::max(); // invalid
+
+  while (m_retxSeqs.size()) {
+    seq = *m_retxSeqs.begin();
+    m_retxSeqs.erase(m_retxSeqs.begin());
+    break;
+  }
+
+  if (seq == std::numeric_limits<uint32_t>::max()) {
+    if (m_seqMax != std::numeric_limits<uint32_t>::max()) {
+      if (m_seq >= m_seqMax) {
+        return; // we are totally done
+      }
+    }
+
+	 //seq = m_seq++; 
+	 //Onur Start
+    seq = m_seq;
+    m_seq = m_seq + 2;
+	 if(seq >= 20)
+	 {
+      if(seq % 2) //odd sequence
+		{
+			seq = 0;
+			m_seq = 2;
+		}
+		else
+		{
+			seq = 1;
+			m_seq = 3;
+		}
+	 }
+	 //Onur End
+  }
+*/ 
+
+  //
+  shared_ptr<Name> nameWithSequence = make_shared<Name>(m_interestName);
+  nameWithSequence->appendSequenceNumber(seq);
+  //
+
+  // shared_ptr<Interest> interest = make_shared<Interest> ();
+  shared_ptr<Interest> interest = make_shared<Interest>();
+  interest->setNonce(m_rand->GetValue(0, std::numeric_limits<uint32_t>::max()));
+  interest->setName(*nameWithSequence);
+  time::milliseconds interestLifeTime(m_interestLifeTime.GetMilliSeconds());
+  interest->setInterestLifetime(interestLifeTime);
+
+  // NS_LOG_INFO ("Requesting Interest: \n" << *interest);
+  NS_LOG_INFO("> Interest for " << seq);
+
+  WillSendOutInterest(seq);
+
+  m_transmittedInterests(interest, this, m_face);
+  m_face->onReceiveInterest(*interest);
+
+  //Onur: There should be no scheduling from the app
+  //ScheduleNextPacket();
+}
+
 ///////////////////////////////////////////////////
 //          Process incoming packets             //
 ///////////////////////////////////////////////////
