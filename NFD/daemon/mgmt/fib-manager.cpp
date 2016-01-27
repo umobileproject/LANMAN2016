@@ -236,7 +236,7 @@ FibManager::removeNextHop(ControlParameters& parameters,
   NFD_LOG_TRACE("remove-nexthop prefix: " << parameters.getName()
                 << " faceid: " << parameters.getFaceId());
 
-  if(parameters.getFaceId() == 999)
+  if(parameters.getFaceId() == 999) //This is an ugly  hack TODO change this
   {
     std::cout<<"Removing SIT entry in fib-manager\n";
     shared_ptr<fib::Entry> sitentry = m_managedSit.findExactMatch(parameters.getName());
@@ -249,8 +249,17 @@ FibManager::removeNextHop(ControlParameters& parameters,
         NFD_LOG_DEBUG("remove-nexthop result: OK, but entry for face id "
                     << parameters.getFaceId() << " not found");
       }
-    //Remove SIT entry   
-
+	std::cout<<"Also removing the FIB entry\n";
+   shared_ptr<fib::Entry> fibentry = m_managedFib.findExactMatch(parameters.getName());
+    if (static_cast<bool>(fibentry))
+     {
+       m_managedFib.erase(*fibentry);
+     }
+    else
+      {
+        NFD_LOG_DEBUG("remove-nexthop result: OK, but entry for face id "
+                    << parameters.getFaceId() << " not found");
+      }
 	 
 	 setResponse(response, 200, "Success", parameters.wireEncode());
   }

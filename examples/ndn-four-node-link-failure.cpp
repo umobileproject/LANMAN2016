@@ -166,12 +166,11 @@ main(int argc, char* argv[])
 
   // Calculate and install FIBs
   ndn::GlobalRoutingHelper::CalculateRoutes();
-  
+
   // consumer app1 sends an interest for 12 at time 2
   ns3::Application *app_ptr = GetPointer(consumer_app1);
   ndn::ConsumerSit *cons = reinterpret_cast<ndn::ConsumerSit *>(app_ptr);
   Simulator::Schedule(Seconds(2.0), &ndn::Consumer::SendPacketWithSeq, cons, 12);
-
 
   //Remove FIB and SIT to disconnect the Producer at time 4
   Simulator::Schedule(Seconds(4.0), (void (*)(Ptr<Node>, const ndn::Name&, Ptr<Node>)) (&ndn::FibHelper::RemoveRoute), nodes.Get(5), n, nodes.Get(2));
