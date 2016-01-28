@@ -281,6 +281,7 @@ RocketfuelMapReader::Read(RocketfuelParams params, bool keepOneComponent /*=true
 
   if (!topgen.is_open()) {
     NS_LOG_WARN("Couldn't open the file " << GetFileName());
+    std::cout<<"Couldn't open the file " << GetFileName();
     return m_nodes;
   }
 

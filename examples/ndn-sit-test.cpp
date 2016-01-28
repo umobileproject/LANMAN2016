@@ -41,7 +41,7 @@
 #include <random>
 
 // for Rocketfuel topology reading
-#include "ns3/ndnSIM/utils/topology/rocketfuel-weights-reader.hpp"
+#include "ns3/ndnSIM/utils/topology/rocketfuel-map-reader.hpp"
 
 // for generating Zipf distributed content
 #include "ns3/ndnSIM/apps/ndn-consumer-zipf-mandelbrot.hpp"
@@ -113,7 +113,7 @@ main(int argc, char* argv[])
   std::string topology_file;
 
   std::cout<<"Number of arguments: "<<argc<<"\n";
-  if(argc != 9)
+  if(argc < 9)
   {
     std::cout<<"Invalid number of parameters: "<<argc<<", Expecting 9\n";
     exit(0);
@@ -148,19 +148,34 @@ main(int argc, char* argv[])
   std::cout<<"End_of_Params\n";
 
 // Prepare the Topology
-  /* Read Rocketfuel topology and set producer 
-  RocketfuelWeightsReader topo_reader("", 1.0);
-  topo_reader.SetFileName("/home/onur/Downloads/maps-n-paths/1785:1785/edges.lat");
-  topo_reader.SetFileType(RocketfuelWeightsReader::LATENCIES);
-  topo_reader.SetDefaultBandwidth("10Mbps");
-  NodeContainer nodes = topo_reader.Read();
-  std::cout << "Number of nodes: "<<nodes.GetN() <<"\n"; */
+  // Read Rocketfuel topology and set producer 
+  RocketfuelParams params;
+  params.averageRtt = 2.0;
+  params.clientNodeDegrees = 2;
+  params.minb2bDelay = "1ms";
+  params.minb2bBandwidth = "10Mbps";
+  params.maxb2bDelay = "6ms";
+  params.maxb2bBandwidth = "100Mbps";
+  params.minb2gDelay = "1ms";
+  params.minb2gBandwidth = "10Mbps";
+  params.maxb2gDelay = "2ms";
+  params.maxb2gBandwidth = "50Mbps";
+  params.ming2cDelay = "1ms";
+  params.ming2cBandwidth = "1Mbps";
+  params.maxg2cDelay = "3ms";
+  params.maxg2cBandwidth = "10Mbps";
+
+  RocketfuelMapReader topo_reader("", 10);
+  std::string topo_file_name = "/home/onur/Downloads/rocketfuel_maps_cch/" + topology_file;
+  topo_reader.SetFileName(topo_file_name);
+  NodeContainer nodes = topo_reader.Read(params, true, true);
 
   // Read network (infrastructure) topology from a file 
+  /*
   AnnotatedTopologyReader topologyReader("", 10);
   std::string topo_file_name = "src/ndnSIM/examples/topologies/" + topology_file;
   topologyReader.SetFileName(topo_file_name);
-  NodeContainer nodes = topologyReader.Read();
+  NodeContainer nodes = topologyReader.Read();*/
   std::cout << "Number of infrastructure nodes: "<<nodes.GetN() <<"\n"; 
   uint32_t num_infrastructure_nodes = nodes.GetN();
 
