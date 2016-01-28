@@ -82,6 +82,8 @@ namespace ns3 {
  *     NS_LOG=ndn.Consumer:ndn.Producer ./waf --run=ndn-simple-with-link-failure
  */
 
+NS_LOG_COMPONENT_DEFINE ("SitTest");
+
 template<typename T>
 void set_new_lambda(std::exponential_distribution<T> *exp_dis, T val)
 {
