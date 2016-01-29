@@ -302,8 +302,8 @@ main(int argc, char* argv[])
 	 std::cout << "Picked a random time: "<<connect_time<<"\n\n";
     Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::SendPacketWithSeq, cons, content_indx);
     connect_time_next = connect_time + rng_exp_con(rnd_gen);
-	 //while(disconnect_time < connect_time_next)
-    while(0)
+    //while(0)
+	 while(disconnect_time < connect_time_next)
 	 { //randomly pick a connected content and disconnect
 	   if(0 == num_connected)
 		{
