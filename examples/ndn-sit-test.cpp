@@ -304,7 +304,7 @@ main(int argc, char* argv[])
 	 { //randomly pick a connected content and disconnect
 	   if(0 == num_connected)
 		{
-		  NS_LOG_INFO("ERROR: Out of connected content)";
+		  NS_LOG_INFO("ERROR: Out of connected content");
 		  break;
 		}
 		uint32_t app_indx;
@@ -325,7 +325,7 @@ main(int argc, char* argv[])
 		  connected_content[app_indx].erase(it);
 		}
 		num_connected--;
-      NS_LOG_INFO("DISCONN "<<access_node<<" "<<it->first<<" "<<disconnect_time<<" "<<it->second); 
+      NS_LOG_INFO("DISCONN "<<app_to_node[app_indx]<<" "<<it->first<<" "<<disconnect_time<<" "<<it->second); 
       double lambda;
       if(0 == num_connected)
 	     lambda = disconnection_rate*1;
