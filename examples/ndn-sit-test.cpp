@@ -312,8 +312,11 @@ main(int argc, char* argv[])
 		{
         app_indx = rnd_gen()%(consumer_apps.GetN());
 		}while(connected_content[app_indx].begin() == connected_content[app_indx].end());
+		NS_LOG_INFO("PICK "<<app_to_node[app_indx]);
 		auto it = connected_content[app_indx].begin();
+		NS_LOG_INFO("BEG: "<<it->first<<" "<<it->second);
 		std::advance(it, rnd_gen() % connected_content[app_indx].size());
+      NS_LOG_INFO("DISCONN "<<app_to_node[app_indx]<<" "<<it->first<<" "<<disconnect_time<<" "<<it->second); 
 		it->second = it->second - 1;
 		if(0 == it->second)
 		{
@@ -325,7 +328,6 @@ main(int argc, char* argv[])
 		  connected_content[app_indx].erase(it);
 		}
 		num_connected--;
-      NS_LOG_INFO("DISCONN "<<app_to_node[app_indx]<<" "<<it->first<<" "<<disconnect_time<<" "<<it->second); 
       double lambda;
       if(0 == num_connected)
 	     lambda = disconnection_rate*1;
