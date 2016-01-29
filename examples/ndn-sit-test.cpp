@@ -296,8 +296,10 @@ main(int argc, char* argv[])
     ns3::Application *app_ptr = PeekPointer(consumer_apps.Get(app_indx));
     ndn::ConsumerSit *cons = reinterpret_cast<ndn::ConsumerSit *>(app_ptr);
     uint32_t content_indx = content_dist.GetNextSeq();
+	 num_connected++;
 	 NS_LOG_INFO( "CON "<<app_to_node[app_indx]<<" "<<content_indx<<" "<<connect_time);
     Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::SendPacketWithSeq, cons, content_indx);
+	 connected_content[app_indx][content_indx]++;
     connect_time_next = connect_time + rng_exp_con(rnd_gen);
     //while(0)
 	 while(disconnect_time < connect_time_next)
