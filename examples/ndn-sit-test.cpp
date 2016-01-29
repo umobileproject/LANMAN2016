@@ -138,16 +138,16 @@ main(int argc, char* argv[])
   cmd.AddValue ("topology_file", "Name of the topology file", topology_file);
   cmd.Parse(argc, argv);
   
-  std::cout<<"Params\n";
-  std::cout<<"num_contents "<<num_contents<<"\n";
-  std::cout<<"connection_rate "<<connection_rate<<"\n";
-  std::cout<<"disconnection_rate "<<disconnection_rate<<"\n";
-  std::cout<<"initialization_period_length "<<initialization_period_length<<"\n";
-  std::cout<<"observation_period_length "<<observation_period_length<<"\n";
-  std::cout<<"zipf_exponent "<<zipf_exponent<<"\n";
-  std::cout<<"cache_size "<<cache_size<<"\n";
-  std::cout<<"topology_file "<<topology_file<<"\n";
-  std::cout<<"End_of_Params\n";
+  NS_LOG_INFO("Params");
+  NS_LOG_INFO("num_contents "<<num_contents);
+  NS_LOG_INFO("connection_rate "<<connection_rate);
+  NS_LOG_INFO("disconnection_rate "<<disconnection_rate);
+  NS_LOG_INFO("initialization_period_length "<<initialization_period_length);
+  NS_LOG_INFO("observation_period_length "<<observation_period_length);
+  NS_LOG_INFO("zipf_exponent "<<zipf_exponent);
+  NS_LOG_INFO("cache_size "<<cache_size);
+  NS_LOG_INFO("topology_file "<<topology_file);
+  NS_LOG_INFO("End_of_Params");
 
 // Prepare the Topology
   // Read Rocketfuel topology and set producer 
@@ -178,7 +178,7 @@ main(int argc, char* argv[])
   std::string topo_file_name = "src/ndnSIM/examples/topologies/" + topology_file;
   topologyReader.SetFileName(topo_file_name);
   NodeContainer nodes = topologyReader.Read();*/
-  std::cout << "Number of infrastructure nodes: "<<nodes.GetN() <<"\n"; 
+  NS_LOG_INFO("Number_of_infrastructure_nodes: "<<nodes.GetN()); 
   uint32_t num_infrastructure_nodes = nodes.GetN();
 
   //Attach a (consumer) node to each router in the topology
@@ -193,7 +193,7 @@ main(int argc, char* argv[])
   nodes.Add(consumer_nodes);
   nodes.Add(producer_node);
   PointToPointHelper p2p;
-  std::cout <<"Num total nodes: "<<nodes.GetN()<<"\n";
+  //NS_LOG_INFO("Num total nodes: "<<nodes.GetN());
   for(uint32_t i = 0; i < num_infrastructure_nodes; i++)
   {
     p2p.Install(nodes.Get(i), nodes.Get(i+num_infrastructure_nodes));
@@ -252,6 +252,7 @@ main(int argc, char* argv[])
   ndn::ConsumerZipfMandelbrot content_dist(num_contents, 0, zipf_exponent);
 
   /***  Initialization Period: ***/
+  NS_LOG_INFO("Beginning of Initialization Period");
   double connect_time = 0.2;
   double disconnect_time = 0.2;
   std::random_device rd; 
@@ -263,12 +264,10 @@ main(int argc, char* argv[])
   do 
   {
 	 uint32_t app_indx = rnd_gen()%(consumer_apps.GetN());
-	 std::cout << "Picked a random node: "<<app_indx<<"\n";
     ns3::Application *app_ptr = PeekPointer(consumer_apps.Get(app_indx));
     ndn::ConsumerSit *cons = reinterpret_cast<ndn::ConsumerSit *>(app_ptr);
     uint32_t content_indx = content_dist.GetNextSeq();
-	 std::cout << "Picked a random content: "<<content_indx<<"\n";
-	 std::cout << "Picked a random time: "<<connect_time<<"\n\n";
+	 NS_LOG_INFO( "CON "<<app_to_node[app_indx]<<" "<<content_indx<<" "<<connect_time);
     Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::SendPacketWithSeq, cons, content_indx);
 	 num_connected++;
     connect_time = connect_time + rng_exp_con(rnd_gen);
@@ -289,17 +288,15 @@ main(int argc, char* argv[])
   disconnect_time = connect_time;
   double connect_time_next;
 	 
-  std::cout << "\n\nBeginning of Observation Period: \n\n";
+  NS_LOG_INFO("Beginning of Observation Period");
   
   while(connect_time < observation_period_length + initialization_period_length)
   {
 	 uint32_t app_indx = rnd_gen()%(consumer_apps.GetN());
-	 std::cout << "Picked a random node: "<<app_indx<<"\n";
     ns3::Application *app_ptr = PeekPointer(consumer_apps.Get(app_indx));
     ndn::ConsumerSit *cons = reinterpret_cast<ndn::ConsumerSit *>(app_ptr);
     uint32_t content_indx = content_dist.GetNextSeq();
-	 std::cout << "Picked a random content: "<<content_indx<<"\n";
-	 std::cout << "Picked a random time: "<<connect_time<<"\n\n";
+	 NS_LOG_INFO( "CON "<<app_to_node[app_indx]<<" "<<content_indx<<" "<<connect_time);
     Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::SendPacketWithSeq, cons, content_indx);
     connect_time_next = connect_time + rng_exp_con(rnd_gen);
     //while(0)
@@ -307,7 +304,7 @@ main(int argc, char* argv[])
 	 { //randomly pick a connected content and disconnect
 	   if(0 == num_connected)
 		{
-		  std::cout<<"ERROR: Out of connected content \n";
+		  NS_LOG_INFO("ERROR: Out of connected content)";
 		  break;
 		}
 		uint32_t app_indx;
@@ -323,21 +320,21 @@ main(int argc, char* argv[])
 		  const ndn::Name content("ndn://" + prefix + std::to_string(it->first));
         int access_node = app_to_node[app_indx];
 		  int router_node = access_to_router[access_node];
-        std::cout<<"Removing from SIT table: "<< it->first<<" at node: "<<app_indx<<"residing at node: "<<access_node<<" at time: "<<disconnect_time<<"\n\n";
+        NS_LOG_INFO("RMV_SIT "<<access_node<<" "<<it->first<<" "<<disconnect_time<<" "<<it->second); 
         Simulator::Schedule(Seconds(disconnect_time), (void (*)(Ptr<Node>, const ndn::Name&, Ptr<Node>)) (&ndn::FibHelper::RemoveRoute), nodes.Get(router_node), content, nodes.Get(access_node));
 		  connected_content[app_indx].erase(it);
 		}
 		num_connected--;
-      std::cout<<"Removing content: "<< it->first<<" from node: "<<app_indx<<" at time: "<<disconnect_time<<"\n\n";
+      NS_LOG_INFO("DISCONN "<<access_node<<" "<<it->first<<" "<<disconnect_time<<" "<<it->second); 
       double lambda;
       if(0 == num_connected)
 	     lambda = disconnection_rate*1;
       else
 	     lambda = disconnection_rate*num_connected;
 	   set_new_lambda(&rng_exp_dis, lambda);
-      std::cout<< "Settng lambda to: "<<rng_exp_dis.lambda()<<"\n";
+      //NS_LOG_INFO( "Settng lambda to: "<<rng_exp_dis.lambda()<<"\n";
 	   disconnect_time = disconnect_time + rng_exp_dis(rnd_gen);
-      std::cout<<"New disconnection time: "<<disconnect_time<<"\n";
+      //NS_LOG_INFO("New disconnection time: "<<disconnect_time<<"\n";
 	 }//End of disconnections
 	 connect_time = connect_time_next;
   }//End of Observation Period
