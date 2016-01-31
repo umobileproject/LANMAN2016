@@ -197,8 +197,10 @@ main(int argc, char* argv[])
   for(uint32_t i = 0; i < num_infrastructure_nodes; i++)
   {
     p2p.Install(nodes.Get(i), nodes.Get(i+num_infrastructure_nodes));
-	 app_to_node.insert(std::make_pair(i, i+num_infrastructure_nodes));
-    access_to_router.insert(std::make_pair(i+num_infrastructure_nodes, i));
+	 //app_to_node.insert(std::make_pair(i, i+num_infrastructure_nodes));
+	 app_to_node[i] = i + num_infrastructure_nodes;
+    //access_to_router.insert(std::make_pair(i+num_infrastructure_nodes, i));
+	 access_to_router[i+num_infrastructure_nodes] = i;
   }
   for(uint32_t i = 0; i < num_infrastructure_nodes; i++)
   {
