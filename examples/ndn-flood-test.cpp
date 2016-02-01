@@ -114,10 +114,10 @@ main(int argc, char* argv[])
   int cache_size;
   std::string topology_file;
 
-  std::cout<<"Number of arguments: "<<argc<<"\n";
-  if(argc < 9)
+  //std::cout<<"Number of arguments: "<<argc<<"\n";
+  if(argc < 10)
   {
-    std::cout<<"Invalid number of parameters: "<<argc<<", Expecting 9\n";
+    std::cout<<"Invalid number of parameters: "<<argc<<", Expecting 10\n";
     exit(0);
   }
 

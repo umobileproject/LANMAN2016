@@ -113,6 +113,7 @@ main(int argc, char* argv[])
   double zipf_exponent;
   int cache_size;
   std::string topology_file;
+  bool bcast_enabled=false;
 
   std::cout<<"Number of arguments: "<<argc<<"\n";
   if(argc < 9)
@@ -136,6 +137,7 @@ main(int argc, char* argv[])
   cmd.AddValue ("zipf_exponent", "Content popularity dist. zipf exponent", zipf_exponent);
   cmd.AddValue ("cache_size", "Size of the cache on routers", cache_size);
   cmd.AddValue ("topology_file", "Name of the topology file", topology_file);
+  cmd.AddValue ("bcast_enabled", "Is flooding enabled", bcast_enabled);
   cmd.Parse(argc, argv);
   
   NS_LOG_INFO("Params");
@@ -147,6 +149,7 @@ main(int argc, char* argv[])
   NS_LOG_INFO("zipf_exponent "<<zipf_exponent);
   NS_LOG_INFO("cache_size "<<cache_size);
   NS_LOG_INFO("topology_file "<<topology_file);
+  NS_LOG_INFO("bcast_enabled? "<<bcast_enabled);
   NS_LOG_INFO("End_of_Params");
 
 // Prepare the Topology
@@ -270,7 +273,10 @@ main(int argc, char* argv[])
     ndn::ConsumerSit *cons = reinterpret_cast<ndn::ConsumerSit *>(app_ptr);
     uint32_t content_indx = content_dist.GetNextSeq();
 	 NS_LOG_INFO( "CON "<<app_to_node[app_indx]<<" "<<content_indx<<" "<<connect_time);
-    Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::SendPacketWithSeq, cons, content_indx);
+	 if(bcast_enabled)
+      Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::FloodPacketWithSeq, cons, content_indx);
+	 else
+      Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::SendPacketWithSeq, cons, content_indx);
 	 num_connected++;
     connect_time = connect_time + rng_exp_con(rnd_gen);
 	 // Bookkeeping of connected contents, their locations and numbers
@@ -300,7 +306,10 @@ main(int argc, char* argv[])
     uint32_t content_indx = content_dist.GetNextSeq();
 	 num_connected++;
 	 NS_LOG_INFO( "CON "<<app_to_node[app_indx]<<" "<<content_indx<<" "<<connect_time);
-    Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::SendPacketWithSeq, cons, content_indx);
+	 if(bcast_enabled)
+      Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::FloodPacketWithSeq, cons, content_indx);
+    else
+      Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::SendPacketWithSeq, cons, content_indx);
 	 connected_content[app_indx][content_indx]++;
     connect_time_next = connect_time + rng_exp_con(rnd_gen);
     //while(0)
