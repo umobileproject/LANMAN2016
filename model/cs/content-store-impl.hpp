@@ -236,9 +236,6 @@ ContentStoreImpl<Policy>::Add(shared_ptr<const Data> data)
 {
   //NS_LOG_FUNCTION(this << data->getName());
   
-  if(data->getName().size() <= 3)
-    NS_LOG_INFO("Adding_cache_entry "<<data->getName());
-
   typename super::policy_container::const_iterator begin_node = this->getPolicy().begin();
 
   bool nonempty = false;
@@ -257,6 +254,9 @@ ContentStoreImpl<Policy>::Add(shared_ptr<const Data> data)
   if (result.first != super::end()) {
     if (result.second) {
       newEntry->SetTrie(result.first);
+      
+		if(data->getName().size() <= 3)
+        NS_LOG_INFO("Added_cache_entry "<<data->getName());
 
       m_didAddEntry(newEntry);
       return true;
