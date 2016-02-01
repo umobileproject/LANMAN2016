@@ -290,6 +290,8 @@ main(int argc, char* argv[])
   {
     Simulator::Schedule(Seconds(initialization_period_length), (void (*)(Ptr<Node>, const ndn::Name&)) (&ndn::FibHelper::RemoveRoute), nodes.Get(indx), n);
   }
+  //Disconnect the Producer completely: This is necessary to prevent broadcasts from reaching the producer
+  Simulator::Schedule(Seconds(initialization_period_length), ndn::LinkControlHelper::FailLink, nodes.Get(num_infrastructure_nodes-1), nodes.Get(app_to_node[num_infrastructure_nodes-1]));
   
   /***  Observation Period: ***/ 
   connect_time = initialization_period_length + 0.2;
