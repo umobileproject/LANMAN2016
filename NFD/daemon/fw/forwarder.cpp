@@ -137,23 +137,43 @@ Forwarder::onContentStoreMiss(const Face& inFace,
   // FIB lookup
   if(0 == interest.getDestinationFlag())
   {
-    fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
-    //TODO add exact match lookup for SIT table
-    if(m_fib.isEmpty(fibEntry)) { //check SIT table
-	   //std::cout << "Checking SIT table for: "<<(*pitEntry).getName()<<" destination flag is 0\n";
-      sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
-	   if(static_cast<bool>(sitEntry))
-		{
-	     //std::cout << "Found an entry for: "<<(*pitEntry).getName()<<" in the SIT table. destination flag is 0\n";
-        NFD_LOG_DEBUG("SIT table lookup succeeded for: " << interest.getName());
-	     (*pitEntry).setDestinationFlag(); 
-		  fibEntry = sitEntry;
-		}
+    if(0 == interest.getFloodFlag())
+	 {
+      fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
+      if(m_fib.isEmpty(fibEntry)) { //check SIT table
+        sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
+	     if(static_cast<bool>(sitEntry))
+		  {
+          NFD_LOG_DEBUG("SIT table lookup succeeded for: " << interest.getName());
+	       (*pitEntry).setDestinationFlag(); 
+		    fibEntry = sitEntry;
+		  }
+      }
     }
+	 else //flood flag is set
+	 {
+       NFD_LOG_INFO("Flood Flag Set in the Interest for: " << interest.getName());
+	   //flood if no SIT match
+      fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
+      if(m_fib.isEmpty(fibEntry)) 
+		{ //check SIT table
+        sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
+	     if(static_cast<bool>(sitEntry))
+		  {
+          NFD_LOG_DEBUG("SIT table lookup succeeded for: " << interest.getName());
+	       (*pitEntry).setDestinationFlag(); 
+		    fibEntry = sitEntry;
+		  }
+        else
+		  {
+          NFD_LOG_DEBUG("PIT Entry Flood Flag is set: " << interest.getName());
+	       (*pitEntry).setFloodFlag(); 
+		  }
+	   }
+	 }
   }
-  else //flag == 1
+  else //destination flag == 1
   {
-	 //std::cout << "Checking SIT table for: "<<(*pitEntry).getName()<<" destination flag is 1\n";
     NFD_LOG_DEBUG("Received a packet with DF set to 1: " << interest.getName());
     sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
 	 if(!static_cast<bool>(sitEntry))
@@ -167,7 +187,6 @@ Forwarder::onContentStoreMiss(const Face& inFace,
 	 {
 	   (*pitEntry).setDestinationFlag(); 
       NFD_LOG_DEBUG("Found an entry for: "<<(*pitEntry).getName()<<" in the SIT table. destination flag is 1");
-	   //std::cout << "Found an entry for: "<<(*pitEntry).getName()<<" in the SIT table. destination flag is 1\n";
 	   fibEntry = sitEntry;
 	 }
   }
@@ -272,6 +291,7 @@ Forwarder::onOutgoingInterest(shared_ptr<pit::Entry> pitEntry, Face& outFace,
   if(pitEntry->getDestinationFlag())
   { //set the destination flag in the Interest packet
     interest->setDestinationFlag(1);
+	 interest->setFloodFlag(0);
 	 //std::cout << "Setting the destination Flag in the out-going interest packet: "<< pitEntry->getName() << "\n"; 
   }
 

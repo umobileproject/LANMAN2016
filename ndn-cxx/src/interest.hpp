@@ -26,6 +26,7 @@
 
 #include "name.hpp"
 #include "destination-flag.hpp"
+#include "flood-flag.hpp"
 #include "selectors.hpp"
 #include "util/time.hpp"
 #include "management/nfd-local-control-header.hpp"
@@ -249,6 +250,28 @@ public: // Name and guiders
     return *this;
   }
 
+  Interest&
+  setFloodFlag(uint32_t val)
+  {
+    if(val > 0)
+      m_floodFlag.set(val);
+
+    uint32_t flag = m_floodFlag.get();
+
+    if(m_wire.hasWire() && m_ffBlock.value_size() == sizeof(uint32_t))
+	 {
+      std::memcpy(const_cast<uint8_t*>(m_ffBlock.value()), &flag, sizeof(uint32_t)); 
+	 }
+	 else
+	 {
+      m_ffBlock = makeBinaryBlock(tlv::FloodFlag, 
+		                            reinterpret_cast<const uint8_t*>(&flag),
+											 sizeof(uint32_t));
+		m_wire.reset();
+	 }
+    return *this;
+  }
+
   uint32_t
   getDestinationFlag() const
   {
@@ -256,6 +279,15 @@ public: // Name and guiders
       const_cast<Interest*>(this)->setDestinationFlag(0);
     
     return readNonNegativeInteger(m_dfBlock);
+  }
+  
+  uint32_t
+  getFloodFlag() const
+  {
+    if (!m_ffBlock.hasWire())
+      const_cast<Interest*>(this)->setFloodFlag(0);
+    
+    return readNonNegativeInteger(m_ffBlock);
   }
   
   const time::milliseconds&
@@ -470,9 +502,11 @@ public: // EqualityComparable concept
 private:
   Name m_name;
   DestinationFlag m_destinationFlag;
+  FloodFlag m_floodFlag;
   Selectors m_selectors;
   mutable Block m_nonce;
   mutable Block m_dfBlock;
+  mutable Block m_ffBlock;
   time::milliseconds m_interestLifetime;
 
   mutable Block m_link;

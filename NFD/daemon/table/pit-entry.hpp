@@ -75,9 +75,18 @@ public:
 
   void
   setDestinationFlag();
-
+  
   void 
   clearDestinationFlag();
+  
+  const bool
+  getFloodFlag();
+
+  void
+  setFloodFlag();
+
+  void 
+  clearFloodFlag();
 
   const Interest&
   getInterest() const;
@@ -186,6 +195,7 @@ private:
 
   shared_ptr<name_tree::Entry> m_nameTreeEntry;
   bool m_destination_flag; //Onur 
+  bool m_flood_flag; //Onur 
 
   friend class nfd::NameTree;
   friend class nfd::name_tree::Entry;

@@ -45,6 +45,7 @@ class BestRouteStrategy2 : public Strategy
 public:
   BestRouteStrategy2(Forwarder& forwarder, const Name& name = STRATEGY_NAME);
 
+
   virtual void
   afterReceiveInterest(const Face& inFace,
                        const Interest& interest,

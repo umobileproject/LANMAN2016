@@ -81,6 +81,12 @@ public:
    */
   void
   SendPacketWithSeq(uint32_t seq);
+  
+  /**
+   * @brief Broadcast packet with a given sequence number
+   */
+  void
+  FloodPacketWithSeq(uint32_t seq);
 
   /**
    * @brief An event that is fired just before an Interest packet is actually send out (send is

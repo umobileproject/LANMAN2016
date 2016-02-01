@@ -35,6 +35,7 @@ const Name Entry::LOCALHOP_NAME("ndn:/localhop");
 Entry::Entry(const Interest& interest)
   : m_interest(interest.shared_from_this())
   , m_destination_flag(false)
+  , m_flood_flag(false)
 {
 }
 
@@ -54,6 +55,24 @@ void
 Entry::clearDestinationFlag()
 {
   m_destination_flag = false;
+}
+
+const bool 
+Entry::getFloodFlag()
+{
+  return m_flood_flag;
+}
+
+void
+Entry::setFloodFlag()
+{
+  m_flood_flag = true;
+}
+
+void 
+Entry::clearFloodFlag()
+{
+  m_flood_flag = false;
 }
 
 const Name&

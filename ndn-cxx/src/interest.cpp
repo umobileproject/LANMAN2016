@@ -226,6 +226,7 @@ Interest::wireEncode(EncodingImpl<TAG>& encoder) const
   //                Link?
   //                SelectedDelegation?
   //                Destination Flag
+  //                Flood Flag
 
   // (reverse encoding)
 
@@ -265,9 +266,15 @@ Interest::wireEncode(EncodingImpl<TAG>& encoder) const
 
   // Destination Flag
   getDestinationFlag();
+ 
+
   totalLength += encoder.prependBlock(m_dfBlock);
   //totalLength += getDestinationFlag().wireEncode(encoder);
 
+ // Flood Flag
+  getFloodFlag();
+  
+  totalLength += encoder.prependBlock(m_ffBlock);
 
   totalLength += encoder.prependVarNumber(totalLength);
   totalLength += encoder.prependVarNumber(tlv::Interest);
@@ -312,9 +319,13 @@ Interest::wireDecode(const Block& wire)
   //                Link?
   //                SelectedDelegation?
   //                Destination Flag
+  //                Flood Flag
 
   if (m_wire.type() != tlv::Interest)
     BOOST_THROW_EXCEPTION(Error("Unexpected TLV number when decoding Interest"));
+  
+  // Flood Flag
+  m_ffBlock = m_wire.get(tlv::FloodFlag);
 
   // Destination Flag
   m_dfBlock = m_wire.get(tlv::DestinationFlag);

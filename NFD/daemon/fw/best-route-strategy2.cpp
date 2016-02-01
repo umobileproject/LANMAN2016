@@ -101,6 +101,27 @@ BestRouteStrategy2::afterReceiveInterest(const Face& inFace,
                                          shared_ptr<fib::Entry> fibEntry,
                                          shared_ptr<pit::Entry> pitEntry)
 {
+  //Flooding code:
+  if(pitEntry->getFloodFlag())
+  {
+     NFD_LOG_INFO("Flooding the packet " << interest.getName());
+     std::cout<<"Flooding the packet: " << interest.getName();
+     
+     for (auto& i : this->getFaceTable()) {
+       if(!i->isLocal() && i->getId() != inFace.getId())
+		 {
+         if (pitEntry->canForwardTo(*i)) {
+           this->sendInterest(pitEntry, i);
+			}
+			else {
+           NFD_LOG_INFO("CanForwardTo Returned false ");
+			}
+	    }
+	  }
+  }
+  //End of Flooding code
+  else{ //not flooding
+
   const fib::NextHopList& nexthops = fibEntry->getNextHops();
   fib::NextHopList::const_iterator it = nexthops.end();
 
@@ -154,6 +175,7 @@ BestRouteStrategy2::afterReceiveInterest(const Face& inFace,
     NFD_LOG_DEBUG(interest << " from=" << inFace.getId()
                            << " retransmit-retry-to=" << outFace->getId());
   }
+  } //else of flooding
 }
 /*
 void

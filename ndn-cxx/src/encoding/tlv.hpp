@@ -88,6 +88,7 @@ enum {
   LinkDelegation = 31,
   SelectedDelegation = 32,
   DestinationFlag = 33,
+  FloodFlag = 34,
 
   AppPrivateBlock1 = 128,
   AppPrivateBlock2 = 32767
