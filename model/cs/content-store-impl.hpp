@@ -33,6 +33,7 @@
 
 #include "../../utils/trie/trie-with-policy.hpp"
 
+
 namespace ns3 {
 namespace ndn {
 namespace cs {
@@ -206,6 +207,7 @@ shared_ptr<Data>
 ContentStoreImpl<Policy>::Lookup(shared_ptr<const Interest> interest)
 {
   NS_LOG_FUNCTION(this << interest->getName());
+  NS_LOG_INFO("Looking up "<< interest->getName());
 
   typename super::const_iterator node;
   if (interest->getExclude().empty()) {
@@ -233,9 +235,23 @@ bool
 ContentStoreImpl<Policy>::Add(shared_ptr<const Data> data)
 {
   NS_LOG_FUNCTION(this << data->getName());
+    
+  NS_LOG_INFO("Adding_cache_entry "<<data->getName());
 
+  typename super::policy_container::const_iterator begin_node = this->getPolicy().begin();
+
+  bool nonempty = false;
+  Name beg;
+  if(this->GetPolicy().size() > 0) 
+  {
+    nonempty = true;
+    beg = this->getPolicy().begin()->payload()->GetName();
+  }
   Ptr<entry> newEntry = Create<entry>(this, data);
   std::pair<typename super::iterator, bool> result = super::insert(data->getName(), newEntry);
+
+  if(nonempty && beg != this->GetPolicy().begin()->payload()->GetName())
+    NS_LOG_INFO("Removed_cache_entry "<<beg);
 
   if (result.first != super::end()) {
     if (result.second) {

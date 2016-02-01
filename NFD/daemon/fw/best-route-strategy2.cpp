@@ -105,7 +105,6 @@ BestRouteStrategy2::afterReceiveInterest(const Face& inFace,
   if(pitEntry->getFloodFlag())
   {
      NFD_LOG_INFO("Flooding the packet " << interest.getName());
-     std::cout<<"Flooding the packet: " << interest.getName();
      
      for (auto& i : this->getFaceTable()) {
        if(!i->isLocal() && i->getId() != inFace.getId())
