@@ -248,8 +248,6 @@ ContentStoreImpl<Policy>::Add(shared_ptr<const Data> data)
   Ptr<entry> newEntry = Create<entry>(this, data);
   std::pair<typename super::iterator, bool> result = super::insert(data->getName(), newEntry);
 
-  if(nonempty && beg != this->GetPolicy().begin()->payload()->GetName() && beg.size() <= 3)
-    NS_LOG_INFO("Removed_cache_entry "<<beg);
 
   if (result.first != super::end()) {
     if (result.second) {
@@ -257,6 +255,9 @@ ContentStoreImpl<Policy>::Add(shared_ptr<const Data> data)
       
 		if(data->getName().size() <= 3)
         NS_LOG_INFO("Added_cache_entry "<<data->getName());
+  
+      if(nonempty && beg != this->GetPolicy().begin()->payload()->GetName() && beg.size() <= 3)
+        NS_LOG_INFO("Removed_cache_entry "<<beg);
 
       m_didAddEntry(newEntry);
       return true;
