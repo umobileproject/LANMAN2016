@@ -246,8 +246,8 @@ FibManager::removeNextHop(ControlParameters& parameters,
       }
     else
       {
-        NFD_LOG_DEBUG("remove-nexthop result: OK, but entry for face id "
-                    << parameters.getFaceId() << " not found");
+        NFD_LOG_DEBUG("remove-nexthop result: OK, but sit entry for name "
+                    << parameters.getName() << " not found");
       }
 	//std::cout<<"Also removing the FIB entry\n";
    shared_ptr<fib::Entry> fibentry = m_managedFib.findExactMatch(parameters.getName());
@@ -257,8 +257,8 @@ FibManager::removeNextHop(ControlParameters& parameters,
      }
     else
       {
-        NFD_LOG_DEBUG("remove-nexthop result: OK, but entry for face id "
-                    << parameters.getFaceId() << " not found");
+        NFD_LOG_DEBUG("remove-nexthop result: OK, but fib entry for name "
+                    << parameters.getName() << " not found");
       }
 	 
 	 setResponse(response, 200, "Success", parameters.wireEncode());

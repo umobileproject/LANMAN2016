@@ -255,6 +255,7 @@ ContentStoreImpl<Policy>::Add(shared_ptr<const Data> data)
       
 		if(data->getName().size() <= 3)
         NS_LOG_INFO("Added_cache_entry "<<data->getName().at(-1).toSequenceNumber());
+        //NS_LOG_INFO("Added_cache_entry "<<data->getName());
   
       if(nonempty && beg != this->GetPolicy().begin()->payload()->GetName() && beg.size() <= 3)
         NS_LOG_INFO("Removed_cache_entry "<<beg.at(-1).toSequenceNumber());

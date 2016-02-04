@@ -385,11 +385,13 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
   dataCopyWithoutPacket->removeTag<ns3::ndn::Ns3PacketTag>();
 
   // CS insert
-  if (m_csFromNdnSim == nullptr)
-    m_cs.insert(*dataCopyWithoutPacket);
-  else
-    m_csFromNdnSim->Add(dataCopyWithoutPacket);
-
+  if(data.getName().size() <= 3) 
+  { //don't cache mgmt data (e.g. FIB Manager)
+    if (m_csFromNdnSim == nullptr)
+      m_cs.insert(*dataCopyWithoutPacket);
+    else
+      m_csFromNdnSim->Add(dataCopyWithoutPacket);
+  }
   std::set<shared_ptr<Face> > pendingDownstreams;
   // foreach PitEntry
   for (const shared_ptr<pit::Entry>& pitEntry : pitMatches) {
