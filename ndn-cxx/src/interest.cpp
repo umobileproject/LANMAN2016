@@ -24,6 +24,10 @@
 #include "util/crypto.hpp"
 #include "data.hpp"
 
+//Onur
+#include "ns3/log.h"
+NS_LOG_COMPONENT_DEFINE("ndn-cxx.Interest");
+
 namespace ndn {
 
 BOOST_CONCEPT_ASSERT((boost::EqualityComparable<Interest>));
@@ -267,14 +271,17 @@ Interest::wireEncode(EncodingImpl<TAG>& encoder) const
   // Destination Flag
   getDestinationFlag();
  
+  NS_LOG_INFO (">> WireEncode Destination Flag: " << m_destinationFlag.get()<<" "<<readNonNegativeInteger(m_dfBlock));
 
   totalLength += encoder.prependBlock(m_dfBlock);
   //totalLength += getDestinationFlag().wireEncode(encoder);
 
  // Flood Flag
   getFloodFlag();
+  NS_LOG_INFO (">> WireEncode Flood Flag: " << m_floodFlag.get() << " "<<readNonNegativeInteger(m_ffBlock));
   
   totalLength += encoder.prependBlock(m_ffBlock);
+  
 
   totalLength += encoder.prependVarNumber(totalLength);
   totalLength += encoder.prependVarNumber(tlv::Interest);
@@ -327,10 +334,12 @@ Interest::wireDecode(const Block& wire)
   // Flood Flag
   m_ffBlock = m_wire.get(tlv::FloodFlag);
   m_floodFlag.set(readNonNegativeInteger(m_ffBlock));
+  NS_LOG_INFO (">> WireDecode Flood Flag: " << m_floodFlag.get() << " "<<readNonNegativeInteger(m_ffBlock) << " "<<m_ffBlock.value_size());
 
   // Destination Flag
   m_dfBlock = m_wire.get(tlv::DestinationFlag);
   m_destinationFlag.set(readNonNegativeInteger(m_dfBlock));
+  NS_LOG_INFO (">> WireDecode destination Flag: " << m_destinationFlag.get() << " "<<readNonNegativeInteger(m_dfBlock)<< " "<<m_dfBlock.value_size());
   //m_destinationFlag.wireDecode(m_wire.get(tlv::DestinationFlag));
 
   // Name

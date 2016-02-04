@@ -460,7 +460,8 @@ readNonNegativeInteger(size_t size, InputIterator& begin, const InputIterator& e
 
       uint32_t value = *reinterpret_cast<const uint32_t*>(&*begin);
       begin += 4;
-      return be32toh(value);
+      //return be32toh(value);
+      return value;
     }
   case 8:
     {
