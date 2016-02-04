@@ -33,6 +33,11 @@
 
 #include <boost/random/uniform_int_distribution.hpp>
 
+// Onur: To read hop count
+//#include "utils/ndn-ns3-packet-tag.hpp"
+#include "utils/ndn-fw-hop-count-tag.hpp"
+#include "ns3/packet.h"
+
 namespace nfd {
 
 NFD_LOG_INIT("Forwarder");
@@ -156,6 +161,17 @@ Forwarder::onContentStoreMiss(const Face& inFace,
 	 else //flood flag is set
 	 {
        NFD_LOG_INFO("Flood Flag Set in the Interest for: " << interest.getName());
+	    unsigned int hopCount = 0;
+       auto ns3PacketTag = interest.getTag<ns3::ndn::Ns3PacketTag>();
+       if (ns3PacketTag != nullptr) // e.g., packet came from local node's cache
+		 {
+         ns3::ndn::FwHopCountTag hopCountTag;
+         if (ns3PacketTag->getPacket()->PeekPacketTag(hopCountTag)) {
+           hopCount = hopCountTag.Get();
+           NFD_LOG_INFO("Interest Hop count: " << hopCount);
+			}
+	    }
+
 	   //flood if no SIT match
       fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
       if(m_fib.isEmpty(fibEntry)) 
@@ -163,16 +179,23 @@ Forwarder::onContentStoreMiss(const Face& inFace,
         sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
 	     if(static_cast<bool>(sitEntry))
 		  {
-          NFD_LOG_DEBUG("SIT table lookup succeeded for: " << interest.getName());
+          NFD_LOG_INFO("SIT table lookup succeeded for: " << interest.getName());
 	       (*pitEntry).setDestinationFlag(); 
 		    fibEntry = sitEntry;
 		  }
         else
 		  {
-          NFD_LOG_DEBUG("PIT Entry Flood Flag is set: " << interest.getName());
-	       (*pitEntry).setFloodFlag(); 
+		    if(hopCount < interest.getFloodFlag())
+			 {
+            NFD_LOG_DEBUG("PIT Entry Flood Flag is set: " << interest.getName());
+	         (*pitEntry).setFloodFlag(); 
+			 }
+			 else
+            NFD_LOG_INFO("Won't Flood, Scope is complete: " << interest.getName());
 		  }
 	   }
+		else
+          NFD_LOG_INFO("FIB table lookup succeeded for: " << interest.getName());
 	 }
   }
   else //destination flag == 1

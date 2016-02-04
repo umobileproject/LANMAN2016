@@ -269,7 +269,7 @@ main(int argc, char* argv[])
     ndn::ConsumerSit *cons = reinterpret_cast<ndn::ConsumerSit *>(app_ptr);
     uint32_t content_indx = content_dist.GetNextSeq();
 	 NS_LOG_INFO( "CON "<<app_to_node[app_indx]<<" "<<content_indx<<" "<<connect_time);
-    Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::FloodPacketWithSeq, cons, content_indx);
+    Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::FloodPacketWithSeq, cons, content_indx,2);
 	 num_connected++;
     connect_time = connect_time + rng_exp_con(rnd_gen);
 	 // Bookkeeping of connected contents, their locations and numbers
@@ -301,7 +301,7 @@ main(int argc, char* argv[])
     uint32_t content_indx = content_dist.GetNextSeq();
 	 num_connected++;
 	 NS_LOG_INFO( "CON "<<app_to_node[app_indx]<<" "<<content_indx<<" "<<connect_time);
-    Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::FloodPacketWithSeq, cons, content_indx);
+    Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::FloodPacketWithSeq, cons, content_indx, 2);
 	 connected_content[app_indx][content_indx]++;
     connect_time_next = connect_time + rng_exp_con(rnd_gen);
     while(0)

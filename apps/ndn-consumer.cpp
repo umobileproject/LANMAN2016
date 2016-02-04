@@ -291,7 +291,7 @@ Consumer::SendPacketWithSeq(uint32_t seq)
 }
 
 void
-Consumer::FloodPacketWithSeq(uint32_t seq)
+Consumer::FloodPacketWithSeq(uint32_t seq, uint32_t scope)
 {
   if (!m_active)
     return;
@@ -342,7 +342,7 @@ Consumer::FloodPacketWithSeq(uint32_t seq)
 
   // shared_ptr<Interest> interest = make_shared<Interest> ();
   shared_ptr<Interest> interest = make_shared<Interest>();
-  interest->setFloodFlag(1);
+  interest->setFloodFlag(scope);
   interest->setNonce(m_rand->GetValue(0, std::numeric_limits<uint32_t>::max()));
   interest->setName(*nameWithSequence);
   time::milliseconds interestLifeTime(m_interestLifeTime.GetMilliSeconds());
