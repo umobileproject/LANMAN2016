@@ -335,7 +335,9 @@ main(int argc, char* argv[])
 		it->second = it->second - 1;
 		if(0 == it->second)
 		{
-		  const ndn::Name content("ndn://" + prefix + std::to_string(it->first));
+		  //const ndn::Name content("ndn://" + prefix + "/" + std::to_string(it->first));
+		  ndn::Name content("ndn://" + prefix);
+		  content.appendSequenceNumber(it->first);
         int access_node = app_to_node[app_indx];
 		  int router_node = access_to_router[access_node];
         NS_LOG_INFO("RMV_SIT "<<access_node<<" "<<it->first<<" "<<disconnect_time<<" "<<it->second); 
