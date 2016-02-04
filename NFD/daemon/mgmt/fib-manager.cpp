@@ -283,7 +283,7 @@ FibManager::removeNextHop(ControlParameters& parameters,
         else
           {
             NFD_LOG_DEBUG("remove-nexthop result: OK, but entry for face id "
-                        << parameters.getFaceId() << " not found");
+                        << parameters.getFaceId() << " not found in FIB");
           }
         //Remove SIT entry   
         shared_ptr<fib::Entry> sitentry = m_managedSit.findExactMatch(parameters.getName());
@@ -301,7 +301,7 @@ FibManager::removeNextHop(ControlParameters& parameters,
         else
           {
             NFD_LOG_DEBUG("remove-nexthop result: OK, but entry for face id "
-                        << parameters.getFaceId() << " not found");
+                        << parameters.getFaceId() << " not found in SIT");
           }  
       }
     else

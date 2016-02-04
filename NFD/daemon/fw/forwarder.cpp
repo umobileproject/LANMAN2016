@@ -149,6 +149,9 @@ Forwarder::onContentStoreMiss(const Face& inFace,
 		    fibEntry = sitEntry;
 		  }
       }
+		else
+        NFD_LOG_DEBUG("FIB table lookup succeeded for: " << interest.getName());
+
     }
 	 else //flood flag is set
 	 {
@@ -178,8 +181,7 @@ Forwarder::onContentStoreMiss(const Face& inFace,
     sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
 	 if(!static_cast<bool>(sitEntry))
 	 {
-      NFD_LOG_DEBUG("onContentStoreMiss: ERROR, no match in SIT table; this should not happen");
-		std::cout<<"ERROR no match in the SIT table for: "<<(*pitEntry).getName()<<" destination flag is 1\n";
+      NFD_LOG_DEBUG("onContentStoreMiss: ERROR, no match in SIT table");
 		//TODO send a NACK???
       fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
     }
@@ -385,13 +387,13 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
   dataCopyWithoutPacket->removeTag<ns3::ndn::Ns3PacketTag>();
 
   // CS insert
-  if(data.getName().size() <= 3) 
-  { //don't cache mgmt data (e.g. FIB Manager)
+  //if(data.getName().size() <= 3) 
+  //{ //don't cache mgmt data (e.g. FIB Manager)
     if (m_csFromNdnSim == nullptr)
       m_cs.insert(*dataCopyWithoutPacket);
     else
       m_csFromNdnSim->Add(dataCopyWithoutPacket);
-  }
+  //}
   std::set<shared_ptr<Face> > pendingDownstreams;
   // foreach PitEntry
   for (const shared_ptr<pit::Entry>& pitEntry : pitMatches) {
@@ -457,9 +459,19 @@ Forwarder::onDataUnsolicited(Face& inFace, const Data& data)
   if (acceptToCache) {
     // CS insert
     if (m_csFromNdnSim == nullptr)
-      m_cs.insert(data, true);
+	 {
+	   if(data.getName().size() <= 3) 
+		{ //This is a hack to prevent mgmt data (e.g. FIB Manager) from being cached
+        m_cs.insert(data, true);
+		}
+	 }
     else
-      m_csFromNdnSim->Add(data.shared_from_this());
+	 {
+	   if(data.getName().size() <= 3) 
+		{ //This is a hack to prevent mgmt data (e.g. FIB Manager) from being cached
+        m_csFromNdnSim->Add(data.shared_from_this());
+		}
+	 }
   }
 
   NFD_LOG_DEBUG("onDataUnsolicited face=" << inFace.getId() <<
