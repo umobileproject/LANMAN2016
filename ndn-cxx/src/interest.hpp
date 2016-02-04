@@ -231,19 +231,16 @@ public: // Name and guiders
   Interest&
   setDestinationFlag(uint32_t val)
   {
-    if(val > 0)
-      m_destinationFlag.set(val);
-
-    uint32_t flag = m_destinationFlag.get();
+    m_destinationFlag.set(val);
 
     if(m_wire.hasWire() && m_dfBlock.value_size() == sizeof(uint32_t))
 	 {
-      std::memcpy(const_cast<uint8_t*>(m_dfBlock.value()), &flag, sizeof(uint32_t)); 
+      std::memcpy(const_cast<uint8_t*>(m_dfBlock.value()), &val, sizeof(uint32_t)); 
 	 }
 	 else
 	 {
       m_dfBlock = makeBinaryBlock(tlv::DestinationFlag, 
-		                            reinterpret_cast<const uint8_t*>(&flag),
+		                            reinterpret_cast<const uint8_t*>(&val),
 											 sizeof(uint32_t));
 		m_wire.reset();
 	 }
@@ -253,19 +250,16 @@ public: // Name and guiders
   Interest&
   setFloodFlag(uint32_t val)
   {
-    if(val > 0)
-      m_floodFlag.set(val);
-
-    uint32_t flag = m_floodFlag.get();
+    m_floodFlag.set(val);
 
     if(m_wire.hasWire() && m_ffBlock.value_size() == sizeof(uint32_t))
 	 {
-      std::memcpy(const_cast<uint8_t*>(m_ffBlock.value()), &flag, sizeof(uint32_t)); 
+      std::memcpy(const_cast<uint8_t*>(m_ffBlock.value()), &val, sizeof(uint32_t)); 
 	 }
 	 else
 	 {
       m_ffBlock = makeBinaryBlock(tlv::FloodFlag, 
-		                            reinterpret_cast<const uint8_t*>(&flag),
+		                            reinterpret_cast<const uint8_t*>(&val),
 											 sizeof(uint32_t));
 		m_wire.reset();
 	 }
@@ -275,8 +269,11 @@ public: // Name and guiders
   uint32_t
   getDestinationFlag() const
   {
-    if (!m_dfBlock.hasWire())
-      const_cast<Interest*>(this)->setDestinationFlag(0);
+    
+	 if (!m_dfBlock.hasWire())
+	 {
+      const_cast<Interest*>(this)->setDestinationFlag(const_cast<DestinationFlag *>(&m_destinationFlag)->get());
+	 }
     
     return readNonNegativeInteger(m_dfBlock);
   }
@@ -285,7 +282,7 @@ public: // Name and guiders
   getFloodFlag() const
   {
     if (!m_ffBlock.hasWire())
-      const_cast<Interest*>(this)->setFloodFlag(0);
+      const_cast<Interest*>(this)->setFloodFlag(const_cast<FloodFlag *>(&m_floodFlag)->get());
     
     return readNonNegativeInteger(m_ffBlock);
   }

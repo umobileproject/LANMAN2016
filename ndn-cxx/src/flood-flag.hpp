@@ -26,7 +26,7 @@ public:
   }
 
   uint32_t 
-  get();
+  get() const;
 
   void 
   set(uint32_t val);

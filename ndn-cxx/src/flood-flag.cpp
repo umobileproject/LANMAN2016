@@ -17,7 +17,7 @@ FloodFlag::clear()
 }
 
 uint32_t
-FloodFlag::get()
+FloodFlag::get() const
 {
   return m_flag;
 }

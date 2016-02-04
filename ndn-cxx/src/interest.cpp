@@ -326,9 +326,11 @@ Interest::wireDecode(const Block& wire)
   
   // Flood Flag
   m_ffBlock = m_wire.get(tlv::FloodFlag);
+  m_floodFlag.set(readNonNegativeInteger(m_ffBlock));
 
   // Destination Flag
   m_dfBlock = m_wire.get(tlv::DestinationFlag);
+  m_destinationFlag.set(readNonNegativeInteger(m_dfBlock));
   //m_destinationFlag.wireDecode(m_wire.get(tlv::DestinationFlag));
 
   // Name

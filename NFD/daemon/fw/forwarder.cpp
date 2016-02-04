@@ -69,7 +69,7 @@ Forwarder::onIncomingInterest(Face& inFace, const Interest& interest)
 {
   // receive Interest
   NFD_LOG_DEBUG("onIncomingInterest face=" << inFace.getId() <<
-                " interest=" << interest.getName());
+                " interest=" << interest.getName() << " FloodFlag " << interest.getFloodFlag()<<" Destination Flag "<<interest.getDestinationFlag());
   const_cast<Interest&>(interest).setIncomingFaceId(inFace.getId());
   ++m_counters.getNInInterests();
 
@@ -187,7 +187,7 @@ Forwarder::onContentStoreMiss(const Face& inFace,
 		  {
 		    if(hopCount < interest.getFloodFlag())
 			 {
-            NFD_LOG_DEBUG("PIT Entry Flood Flag is set: " << interest.getName());
+            NFD_LOG_DEBUG("PIT Entry Flood Flag is set: " << interest.getFloodFlag());
 	         (*pitEntry).setFloodFlag(); 
 			 }
 			 else

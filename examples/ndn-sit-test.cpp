@@ -114,10 +114,10 @@ main(int argc, char* argv[])
   int cache_size;
   std::string topology_file;
   bool bcast_enabled=false;
-  unsigned int bcast_scope = 0;
+  uint32_t bcast_scope = 0;
 
   std::cout<<"Number of arguments: "<<argc<<"\n";
-  if(argc < 10)
+  if(argc < 11)
   {
     std::cout<<"Invalid number of parameters: "<<argc<<", Expecting 10\n";
     exit(0);
@@ -139,7 +139,7 @@ main(int argc, char* argv[])
   cmd.AddValue ("cache_size", "Size of the cache on routers", cache_size);
   cmd.AddValue ("topology_file", "Name of the topology file", topology_file);
   cmd.AddValue ("bcast_enabled", "Is flooding enabled", bcast_enabled);
-  cmd.AddValue ("bcast_scope", "Scope (in number of hops) of flooding", bcast_enabled);
+  cmd.AddValue ("bcast_scope", "Scope (in number of hops) of flooding", bcast_scope);
   cmd.Parse(argc, argv);
   
   NS_LOG_INFO("Params");
@@ -173,17 +173,19 @@ main(int argc, char* argv[])
   params.maxg2cDelay = "3ms";
   params.maxg2cBandwidth = "10Mbps";
 
+/*
   RocketfuelMapReader topo_reader("", 10);
   std::string topo_file_name = "/home/onur/Downloads/rocketfuel_maps_cch/" + topology_file;
   topo_reader.SetFileName(topo_file_name);
   NodeContainer nodes = topo_reader.Read(params, true, true);
-
+*/
   // Read network (infrastructure) topology from a file 
-  /*
+  ///*
   AnnotatedTopologyReader topologyReader("", 10);
   std::string topo_file_name = "src/ndnSIM/examples/topologies/" + topology_file;
   topologyReader.SetFileName(topo_file_name);
-  NodeContainer nodes = topologyReader.Read();*/
+  NodeContainer nodes = topologyReader.Read();//*/
+
   NS_LOG_INFO("Number_of_infrastructure_nodes: "<<nodes.GetN()); 
   uint32_t num_infrastructure_nodes = nodes.GetN();
 
@@ -277,7 +279,7 @@ main(int argc, char* argv[])
     uint32_t content_indx = content_dist.GetNextSeq();
 	 NS_LOG_INFO( "CON "<<app_to_node[app_indx]<<" "<<content_indx<<" "<<connect_time);
 	 if(bcast_enabled)
-      Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::FloodPacketWithSeq, cons, content_indx, 2);
+      Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::FloodPacketWithSeq, cons, content_indx, bcast_scope);
 	 else
       Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::SendPacketWithSeq, cons, content_indx);
 	 num_connected++;
@@ -312,7 +314,7 @@ main(int argc, char* argv[])
 	 num_connected++;
 	 NS_LOG_INFO( "CON "<<app_to_node[app_indx]<<" "<<content_indx<<" "<<connect_time);
 	 if(bcast_enabled)
-      Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::FloodPacketWithSeq, cons, content_indx, 2);
+      Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::FloodPacketWithSeq, cons, content_indx, bcast_scope);
     else
       Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::SendPacketWithSeq, cons, content_indx);
 	 connected_content[app_indx][content_indx]++;

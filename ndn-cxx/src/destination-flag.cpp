@@ -36,7 +36,7 @@ DestinationFlag::getFlag() const
 }*/
 
 void
-DestinationFlag::set(uint32_t val)
+DestinationFlag::set(uint32_t val) 
 {
   if(val >= 0)
     m_flag = val;
@@ -49,7 +49,7 @@ DestinationFlag::clear()
 }
 
 uint32_t
-DestinationFlag::get()
+DestinationFlag::get() const
 {
   return m_flag;
 }
