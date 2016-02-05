@@ -33,6 +33,9 @@
 #include "tag-host.hpp"
 #include "link.hpp"
 
+//Onur for htobe32 TODO: fix the encoding for the flags. byte order conversion should not be necessary
+#include "encoding/endian.hpp"
+
 namespace ndn {
 
 class Data;
