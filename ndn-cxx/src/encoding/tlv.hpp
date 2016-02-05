@@ -460,10 +460,7 @@ readNonNegativeInteger(size_t size, InputIterator& begin, const InputIterator& e
 
       uint32_t value = *reinterpret_cast<const uint32_t*>(&*begin);
       begin += 4;
-      ////TODO fix the flags without this hack
-      // This may break other things in the code!!!
-      return value;
-      //return be32toh(value); 
+      return be32toh(value); 
     }
   case 8:
     {

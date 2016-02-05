@@ -242,9 +242,7 @@ public: // Name and guiders
 	 }
 	 else
 	 {
-      m_dfBlock = makeBinaryBlock(tlv::DestinationFlag, 
-		                            reinterpret_cast<const uint8_t*>(&val),
-											 sizeof(uint32_t));
+      m_dfBlock = makeNonNegativeIntegerBlock(tlv::DestinationFlag, val);
 		m_wire.reset();
 	 }
     return *this;
@@ -261,9 +259,7 @@ public: // Name and guiders
 	 }
 	 else
 	 {
-      m_ffBlock = makeBinaryBlock(tlv::FloodFlag, 
-		                            reinterpret_cast<const uint8_t*>(&val),
-											 sizeof(uint32_t));
+      m_ffBlock = makeNonNegativeIntegerBlock(tlv::FloodFlag, val);
 		m_wire.reset();
 	 }
     return *this;
