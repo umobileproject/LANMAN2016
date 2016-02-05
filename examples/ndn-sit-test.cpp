@@ -46,6 +46,8 @@
 // for generating Zipf distributed content
 #include "ns3/ndnSIM/apps/ndn-consumer-zipf-mandelbrot.hpp"
 
+#include "ns3/log.h"
+
 namespace ns3 {
 
 /**
@@ -100,10 +102,15 @@ TargetType convert(const std::string& value) {
 
     return converted;
 }
-
+// Run with:  NS_LOG=ndn.Consumer=info:SitTest=info:ndn.cs.Lru=info:nfd.FibManager=info:nfd.Forwarder=info ./waf --run="ndn-sit-test --num_contents=10 --connection_rate=1.0 --disconnection_rate=0.01 --initialization_period_length=20.0 --observation_period_length=40.0 --zipf_exponent=0.2 --cache_size=1 --topology_file=topo-grid-3x3-producer-attached.txt --bcast_enabled=true --bcast_scope=2"
 int
 main(int argc, char* argv[])
 {
+  LogComponentEnable("nfd.Forwarder", LOG_PREFIX_ALL);  //print time, node , etc. information for each log
+  LogComponentEnable("nfd.FibManager", LOG_PREFIX_ALL); 
+  LogComponentEnable("ndn.Consumer", LOG_PREFIX_ALL); 
+  LogComponentEnable("ndn.cs.Lru", LOG_PREFIX_ALL); 
+  LogComponentEnable("SitTest", LOG_PREFIX_ALL);  
   //Parameters of the simulation (to be read from the command line)
   int num_contents;
   double connection_rate;
@@ -116,7 +123,6 @@ main(int argc, char* argv[])
   bool bcast_enabled=false;
   uint32_t bcast_scope = 0;
 
-  std::cout<<"Number of arguments: "<<argc<<"\n";
   if(argc < 11)
   {
     std::cout<<"Invalid number of parameters: "<<argc<<", Expecting 10\n";
@@ -142,19 +148,6 @@ main(int argc, char* argv[])
   cmd.AddValue ("bcast_scope", "Scope (in number of hops) of flooding", bcast_scope);
   cmd.Parse(argc, argv);
   
-  NS_LOG_INFO("Params");
-  NS_LOG_INFO("num_contents "<<num_contents);
-  NS_LOG_INFO("connection_rate "<<connection_rate);
-  NS_LOG_INFO("disconnection_rate "<<disconnection_rate);
-  NS_LOG_INFO("initialization_period_length "<<initialization_period_length);
-  NS_LOG_INFO("observation_period_length "<<observation_period_length);
-  NS_LOG_INFO("zipf_exponent "<<zipf_exponent);
-  NS_LOG_INFO("cache_size "<<cache_size);
-  NS_LOG_INFO("topology_file "<<topology_file);
-  NS_LOG_INFO("bcast_enabled? "<<bcast_enabled);
-  NS_LOG_INFO("bcast_scope "<<bcast_scope);
-  NS_LOG_INFO("End_of_Params");
-
 // Prepare the Topology
   // Read Rocketfuel topology and set producer 
   RocketfuelParams params;
@@ -185,6 +178,19 @@ main(int argc, char* argv[])
   std::string topo_file_name = "src/ndnSIM/examples/topologies/" + topology_file;
   topologyReader.SetFileName(topo_file_name);
   NodeContainer nodes = topologyReader.Read();//*/
+
+  NS_LOG_INFO("Params");
+  NS_LOG_INFO("num_contents "<<num_contents);
+  NS_LOG_INFO("connection_rate "<<connection_rate);
+  NS_LOG_INFO("disconnection_rate "<<disconnection_rate);
+  NS_LOG_INFO("initialization_period_length "<<initialization_period_length);
+  NS_LOG_INFO("observation_period_length "<<observation_period_length);
+  NS_LOG_INFO("zipf_exponent "<<zipf_exponent);
+  NS_LOG_INFO("cache_size "<<cache_size);
+  NS_LOG_INFO("topology_file "<<topology_file);
+  NS_LOG_INFO("bcast_enabled? "<<bcast_enabled);
+  NS_LOG_INFO("bcast_scope "<<bcast_scope);
+  NS_LOG_INFO("End_of_Params");
 
   NS_LOG_INFO("Number_of_infrastructure_nodes: "<<nodes.GetN()); 
   uint32_t num_infrastructure_nodes = nodes.GetN();

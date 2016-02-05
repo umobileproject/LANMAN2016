@@ -206,8 +206,7 @@ template<class Policy>
 shared_ptr<Data>
 ContentStoreImpl<Policy>::Lookup(shared_ptr<const Interest> interest)
 {
-  //NS_LOG_FUNCTION(this << interest->getName());
-  //NS_LOG_INFO("Looking up "<< interest->getName());
+  NS_LOG_FUNCTION(this << interest->getName());
 
   typename super::const_iterator node;
   if (interest->getExclude().empty()) {
@@ -234,7 +233,7 @@ template<class Policy>
 bool
 ContentStoreImpl<Policy>::Add(shared_ptr<const Data> data)
 {
-  //NS_LOG_FUNCTION(this << data->getName());
+  NS_LOG_FUNCTION(this << data->getName());
   
   typename super::policy_container::const_iterator begin_node = this->getPolicy().begin();
 
@@ -255,8 +254,8 @@ ContentStoreImpl<Policy>::Add(shared_ptr<const Data> data)
       
 		if(data->getName().size() <= 3)
         NS_LOG_INFO("Added_cache_entry "<<data->getName().at(-1).toSequenceNumber());
-		else
-        NS_LOG_INFO("Added_cache_entry "<<data->getName());
+		//else
+        //NS_LOG_INFO("Added_cache_entry "<<data->getName());
   
       if(nonempty && beg != this->GetPolicy().begin()->payload()->GetName() && beg.size() <= 3)
         NS_LOG_INFO("Removed_cache_entry "<<beg.at(-1).toSequenceNumber());

@@ -70,6 +70,11 @@ Forwarder::onIncomingInterest(Face& inFace, const Interest& interest)
   // receive Interest
   NFD_LOG_DEBUG("onIncomingInterest face=" << inFace.getId() <<
                 " interest=" << interest.getName() << " FloodFlag " << interest.getFloodFlag()<<" Destination Flag "<<interest.getDestinationFlag());
+  if(interest.getName().size() <= 3)
+  { 
+    NFD_LOG_INFO("onIncomingInterest face=" << inFace.getId() <<
+                " interest=" << interest.getName() << " FloodFlag " << interest.getFloodFlag()<<" Destination Flag "<<interest.getDestinationFlag());
+  }
   const_cast<Interest&>(interest).setIncomingFaceId(inFace.getId());
   ++m_counters.getNInInterests();
 
@@ -160,7 +165,7 @@ Forwarder::onContentStoreMiss(const Face& inFace,
     }
 	 else //flood flag is set
 	 {
-       NFD_LOG_INFO("Flood Flag Set in the Interest for: " << interest.getName());
+       NFD_LOG_DEBUG("Flood Flag Set in the Interest for: " << interest.getName());
 	    unsigned int hopCount = 0;
        auto ns3PacketTag = interest.getTag<ns3::ndn::Ns3PacketTag>();
        if (ns3PacketTag != nullptr) // e.g., packet came from local node's cache
@@ -168,7 +173,7 @@ Forwarder::onContentStoreMiss(const Face& inFace,
          ns3::ndn::FwHopCountTag hopCountTag;
          if (ns3PacketTag->getPacket()->PeekPacketTag(hopCountTag)) {
            hopCount = hopCountTag.Get();
-           NFD_LOG_INFO("Interest Hop count: " << hopCount);
+           NFD_LOG_DEBUG("Interest Hop count: " << hopCount);
 			}
 	    }
 
@@ -179,7 +184,7 @@ Forwarder::onContentStoreMiss(const Face& inFace,
         sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
 	     if(static_cast<bool>(sitEntry))
 		  {
-          NFD_LOG_INFO("SIT table lookup succeeded for: " << interest.getName());
+          NFD_LOG_DEBUG("SIT table lookup succeeded for: " << interest.getName());
 	       (*pitEntry).setDestinationFlag(); 
 		    fibEntry = sitEntry;
 		  }
@@ -191,11 +196,11 @@ Forwarder::onContentStoreMiss(const Face& inFace,
 	         (*pitEntry).setFloodFlag(); 
 			 }
 			 else
-            NFD_LOG_INFO("Won't Flood, Scope is complete: " << interest.getName());
+            NFD_LOG_DEBUG("Won't Flood, Scope is complete: " << interest.getName());
 		  }
 	   }
 		else
-          NFD_LOG_INFO("FIB table lookup succeeded for: " << interest.getName());
+          NFD_LOG_DEBUG("FIB table lookup succeeded for: " << interest.getName());
 	 }
   }
   else //destination flag == 1
@@ -228,8 +233,6 @@ Forwarder::onContentStoreHit(const Face& inFace,
                              const Data& data)
 {
   NFD_LOG_DEBUG("onContentStoreHit interest=" << interest.getName());
-
-  //std::cout <<"Content Store HIT for: "<< interest.getName()<<"\n";
 
   beforeSatisfyInterest(*pitEntry, *m_csFace, data);
   this->dispatchToStrategy(pitEntry, bind(&Strategy::beforeSatisfyInterest, _1,
@@ -378,6 +381,10 @@ void
 Forwarder::onIncomingData(Face& inFace, const Data& data)
 {
   // receive Data
+  if(data.getName().size() <= 3)
+  { 
+    NFD_LOG_INFO("onIncomingData face=" << inFace.getId());
+  }
   NFD_LOG_DEBUG("onIncomingData face=" << inFace.getId() << " data=" << data.getName());
   const_cast<Data&>(data).setIncomingFaceId(inFace.getId());
   ++m_counters.getNInDatas();

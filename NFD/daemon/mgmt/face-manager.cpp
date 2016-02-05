@@ -223,7 +223,7 @@ FaceManager::addCreatedFaceToForwarder(const shared_ptr<Face>& newFace)
 {
   m_faceTable.add(newFace);
 
-  //NFD_LOG_DEBUG("Created face " << newFace->getRemoteUri() << " ID " << newFace->getId());
+  NFD_LOG_DEBUG("Created face " << newFace->getRemoteUri() << " ID " << newFace->getId());
 }
 
 void

@@ -242,17 +242,19 @@ FibManager::removeNextHop(ControlParameters& parameters,
     shared_ptr<fib::Entry> sitentry = m_managedSit.findExactMatch(parameters.getName());
     if (static_cast<bool>(sitentry))
       { //erase the entry
+        NFD_LOG_INFO("Removed_SIT entry for "<<parameters.getName());
         m_managedSit.erase(*sitentry);
       }
+    
     else
       {
         NFD_LOG_DEBUG("remove-nexthop result: OK, but sit entry for name "
                     << parameters.getName() << " not found");
       }
-	//std::cout<<"Also removing the FIB entry\n";
    shared_ptr<fib::Entry> fibentry = m_managedFib.findExactMatch(parameters.getName());
     if (static_cast<bool>(fibentry))
      {
+       NFD_LOG_INFO("Removed_FIB entry for "<<parameters.getName());
        m_managedFib.erase(*fibentry);
      }
     else
@@ -272,6 +274,7 @@ FibManager::removeNextHop(ControlParameters& parameters,
         if (static_cast<bool>(entry))
           {
             entry->removeNextHop(faceToRemove);
+            NFD_LOG_INFO("Removed_FIB entry for "<<parameters.getName());
             NFD_LOG_DEBUG("remove-nexthop result: OK prefix: " << parameters.getName()
                         << " faceid: " << parameters.getFaceId());
 
@@ -290,6 +293,7 @@ FibManager::removeNextHop(ControlParameters& parameters,
         if (static_cast<bool>(sitentry))
           {
             sitentry->removeNextHop(faceToRemove);
+            NFD_LOG_INFO("Removed_SIT entry for "<<parameters.getName());
             NFD_LOG_DEBUG("remove-nexthop result: OK prefix: " << parameters.getName()
                           << " faceid: " << parameters.getFaceId());
 
@@ -302,7 +306,7 @@ FibManager::removeNextHop(ControlParameters& parameters,
           {
             NFD_LOG_DEBUG("remove-nexthop result: OK, but entry for face id "
                         << parameters.getFaceId() << " not found in SIT");
-          }  
+          }
       }
     else
       {
