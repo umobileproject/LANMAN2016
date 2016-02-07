@@ -242,7 +242,7 @@ FibManager::removeNextHop(ControlParameters& parameters,
     shared_ptr<fib::Entry> sitentry = m_managedSit.findExactMatch(parameters.getName());
     if (static_cast<bool>(sitentry))
       { //erase the entry
-        NFD_LOG_INFO("Removed_SIT entry for "<<parameters.getName());
+        NFD_LOG_INFO("Removed_SIT entry for "<<parameters.getName().at(-1).toSequenceNumber());
         m_managedSit.erase(*sitentry);
       }
     
@@ -293,7 +293,7 @@ FibManager::removeNextHop(ControlParameters& parameters,
         if (static_cast<bool>(sitentry))
           {
             sitentry->removeNextHop(faceToRemove);
-            NFD_LOG_INFO("Removed_SIT entry for "<<parameters.getName());
+            NFD_LOG_INFO("Removed_SIT entry for "<<parameters.getName().at(-1).toSequenceNumber());
             NFD_LOG_DEBUG("remove-nexthop result: OK prefix: " << parameters.getName()
                           << " faceid: " << parameters.getFaceId());
 
