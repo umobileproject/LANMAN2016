@@ -26,6 +26,7 @@
 #include "fib-entry.hpp"
 
 namespace nfd {
+NFD_LOG_INIT("FibEntry");
 namespace fib {
 
 Entry::Entry(const Name& prefix)
@@ -52,10 +53,15 @@ void
 Entry::addNextHop(shared_ptr<Face> face, uint64_t cost)
 {
   auto it = this->findNextHop(*face);
+  Name n("/localhost/nfd"); 
   if (it == m_nextHops.end()) {
     m_nextHops.push_back(fib::NextHop(face));
     it = m_nextHops.end();
     --it;
+	 if(getPrefix().size() == 2 && !getPrefix().equals(n))
+	 {
+      NFD_LOG_INFO("Added_SIT entry for " << getPrefix().at(-1).toSequenceNumber());
+	 }
   }
   // now it refers to the NextHop for face
 
