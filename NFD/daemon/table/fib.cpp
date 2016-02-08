@@ -191,4 +191,10 @@ Fib::begin() const
   return const_iterator(m_nameTree.fullEnumerate(&predicate_NameTreeEntry_hasFibEntry).begin());
 }
 
+NameTree&
+Fib::getNameTree() const
+{
+  return m_nameTree;
+}
+
 } // namespace nfd

@@ -24,6 +24,9 @@ public:
   shared_ptr<fib::Entry>
   findExactMatch(const Name& prefix);
 
+  void
+  erase(const fib::Entry& entry);
+
 
 private:
   template<class K, class T>
@@ -100,6 +103,18 @@ private:
            return std::make_pair(data, false);
          }
        }
+    }
+
+    T remove (K const key)
+    {
+      LRUCacheEntry<K,T>* node = m_mapping[key];
+      if(node)
+      {
+         detach(node);
+         return node->data;
+      }
+      else 
+        return NULL;
     }
 
     T get(K const key) 

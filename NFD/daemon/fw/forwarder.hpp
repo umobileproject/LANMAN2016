@@ -103,6 +103,9 @@ public: // forwarding entrypoints and tables
   Cs&
   getCs();
 
+  ns3::Ptr<ns3::ndn::ContentStore>
+  getContentStore();
+
   Measurements&
   getMeasurements();
 
@@ -308,6 +311,12 @@ inline Cs&
 Forwarder::getCs()
 {
   return m_cs;
+}
+
+inline ns3::Ptr<ns3::ndn::ContentStore>
+Forwarder::getContentStore()
+{
+  return m_csFromNdnSim;
 }
 
 inline Measurements&

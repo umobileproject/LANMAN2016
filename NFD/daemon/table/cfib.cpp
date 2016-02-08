@@ -60,4 +60,14 @@ Cfib::insert(const Name& prefix)
   return p;
 }
 
+void
+Cfib::erase(const fib::Entry& entry)
+{
+  shared_ptr<name_tree::Entry> nameTreeEntry = getNameTree().get(entry);
+  if (static_cast<bool>(nameTreeEntry)) {
+    m_cache.remove(nameTreeEntry->getPrefix());
+  }
+  Fib::erase(entry);
+}
+
 } //namespace nfd

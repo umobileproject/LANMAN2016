@@ -57,6 +57,9 @@ public:
 
   virtual bool
   Add(shared_ptr<const Data> data);
+  
+  virtual void
+  Remove(Name n);
 
   virtual void
   Print(std::ostream& os) const;

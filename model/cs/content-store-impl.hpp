@@ -108,6 +108,9 @@ public:
 
   virtual inline bool
   Add(shared_ptr<const Data> data);
+  
+  virtual inline void
+  Remove(Name n);
 
   // virtual bool
   // Remove (shared_ptr<Interest> header);
@@ -227,6 +230,14 @@ ContentStoreImpl<Policy>::Lookup(shared_ptr<const Interest> interest)
     this->m_cacheMissesTrace(interest);
     return 0;
   }
+}
+
+template<class Policy>
+void
+ContentStoreImpl<Policy>::Remove(Name n)
+{
+  NS_LOG_INFO("In ContentStoreImpl Remove"<<n);
+  super::erase(n);
 }
 
 template<class Policy>

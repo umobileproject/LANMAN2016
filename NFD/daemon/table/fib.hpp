@@ -70,6 +70,8 @@ public: // lookup
 
   bool isEmpty(shared_ptr<fib::Entry> fibEntry) const;
 
+  NameTree& getNameTree() const;
+
 public: // mutation
   /** \brief inserts a FIB entry for prefix
    *  If an entry for exact same prefix exists, that entry is returned.

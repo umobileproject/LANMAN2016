@@ -30,6 +30,11 @@
 // for removing fib entries
 #include "ns3/ndnSIM/helper/ndn-fib-helper.hpp"
 
+// for removing cache entries
+//#include "ns3/ndnSIM/model/cs/content-store-impl.hpp"
+//#include "ns3/ndnSIM/utils/trie/lru-policy.hpp"
+#include "ns3/ndnSIM/model/cs/ndn-content-store.hpp"
+
 // for scheduling application-level events (e.g., SendPacket)
 #include "ns3/ndnSIM/apps/ndn-consumer.hpp"
 #include "ns3/ndnSIM/apps/ndn-consumer-cbr.hpp"
@@ -47,6 +52,9 @@
 #include "ns3/ndnSIM/apps/ndn-consumer-zipf-mandelbrot.hpp"
 
 #include "ns3/log.h"
+
+// for obtaining forwarder of a node
+#include "ns3/ndnSIM/model/ndn-l3-protocol.hpp"
 
 namespace ns3 {
 
@@ -355,6 +363,12 @@ main(int argc, char* argv[])
         NS_LOG_INFO("RMV_SIT "<<access_node<<" "<<it->first<<" "<<disconnect_time<<" "<<it->second); 
         Simulator::Schedule(Seconds(disconnect_time), (void (*)(Ptr<Node>, const ndn::Name&, Ptr<Node>)) (&ndn::FibHelper::RemoveRoute), nodes.Get(router_node), content, nodes.Get(access_node));
 		  connected_content[app_indx].erase(it);
+		  Ptr<Node> n = nodes.Get(access_node);
+		  Ptr<ndn::L3Protocol> p =  ndn::L3Protocol::getL3Protocol(n);
+		  shared_ptr<nfd::Forwarder> f = p->getForwarder();
+		  ns3::Ptr<ns3::ndn::ContentStore> cs = f->getContentStore();
+		  Simulator::Schedule(Seconds(disconnect_time), (&ns3::ndn::ContentStore::Remove), cs, content);
+		//  Simulator::Schedule(Seconds(disconnect_time), (&ndn::cs::ContentStoreImpl<ns3::ndn::ndnSIM::lru_policy_traits>::Remove), der_cs, content);
 		}
 		num_connected--;
       double lambda;

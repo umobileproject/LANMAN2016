@@ -109,6 +109,7 @@ Forwarder::onIncomingInterest(Face& inFace, const Interest& interest)
   bool isPending = inRecords.begin() != inRecords.end();
   if (!isPending) {
     if (m_csFromNdnSim == nullptr) {
+	   
       m_cs.find(interest,
                 bind(&Forwarder::onContentStoreHit, this, ref(inFace), pitEntry, _1, _2),
                 bind(&Forwarder::onContentStoreMiss, this, ref(inFace), pitEntry, _1));

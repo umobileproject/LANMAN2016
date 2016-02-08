@@ -138,6 +138,8 @@ public:
   //  */
   // virtual bool
   // Remove (shared_ptr<Interest> header) = 0;
+  virtual void
+  Remove (Name n) = 0;
 
   /**
    * \brief Print out content store entries
