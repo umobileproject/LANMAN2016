@@ -111,6 +111,8 @@ private:
       if(node)
       {
          detach(node);
+         m_mapping.erase(node->key);
+         m_freeEntries.push_back(node); 
          return node->data;
       }
       else 

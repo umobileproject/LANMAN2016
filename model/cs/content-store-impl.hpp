@@ -236,7 +236,7 @@ template<class Policy>
 void
 ContentStoreImpl<Policy>::Remove(Name n)
 {
-  NS_LOG_INFO("In ContentStoreImpl Remove"<<n);
+  //NS_LOG_INFO("In ContentStoreImpl Remove"<<n);
   super::erase(n);
 }
 

@@ -279,7 +279,7 @@ Consumer::SendPacketWithSeq(uint32_t seq)
 
   // NS_LOG_INFO ("Requesting Interest: \n" << *interest);
   NS_LOG_INFO("> Interest for " << seq);
-  NS_LOG_INFO("> Interest for " << *nameWithSequence); //TODO remove
+  //NS_LOG_INFO("> Interest for " << *nameWithSequence); //TODO remove
 
   WillSendOutInterest(seq);
 

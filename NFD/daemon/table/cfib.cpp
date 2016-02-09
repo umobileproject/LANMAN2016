@@ -3,6 +3,8 @@
 
 namespace nfd {
 
+NFD_LOG_INIT("Cfib");
+
 Cfib::Cfib(NameTree& nameTree, size_t capacity)
   : Fib(nameTree)
   , m_cache(capacity)
@@ -54,6 +56,7 @@ Cfib::insert(const Name& prefix)
     std::pair<shared_ptr<fib::Entry>, bool> e = m_cache.put(prefix, p.first); 
     if(e.second)
     {
+      NFD_LOG_INFO("Removed_SIT entry for "<<(e.first)->getPrefix().at(-1).toSequenceNumber());
       Fib::erase(*(e.first));  
     }
   }
@@ -64,7 +67,8 @@ void
 Cfib::erase(const fib::Entry& entry)
 {
   shared_ptr<name_tree::Entry> nameTreeEntry = getNameTree().get(entry);
-  if (static_cast<bool>(nameTreeEntry)) {
+  if (static_cast<bool>(nameTreeEntry)) { 
+    NFD_LOG_INFO("Removed_SIT entry for "<<nameTreeEntry->getPrefix().at(-1).toSequenceNumber());
     m_cache.remove(nameTreeEntry->getPrefix());
   }
   Fib::erase(entry);

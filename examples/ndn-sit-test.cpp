@@ -110,12 +110,13 @@ TargetType convert(const std::string& value) {
 
     return converted;
 }
-// Run with:  NS_LOG=ndn.Consumer=info:SitTest=info:ndn.cs.Lru=info:nfd.FibManager=info:nfd.Forwarder=info ./waf --run="ndn-sit-test --num_contents=10 --connection_rate=1.0 --disconnection_rate=0.01 --initialization_period_length=20.0 --observation_period_length=40.0 --zipf_exponent=0.2 --cache_size=1 --topology_file=topo-grid-3x3-producer-attached.txt --bcast_enabled=true --bcast_scope=2"
+// Run with: NS_LOG=ndn.Consumer=info:SitTest=info:ndn.cs.Lru=info:nfd.FibManager=info:nfd.Forwarder=info:nfd.Cfib=info:nfd.FibEntry=info
 int
 main(int argc, char* argv[])
 {
   LogComponentEnable("nfd.Forwarder", LOG_PREFIX_ALL);  //print time, node , etc. information for each log
   LogComponentEnable("nfd.FibManager", LOG_PREFIX_ALL); 
+  LogComponentEnable("nfd.Cfib", LOG_PREFIX_ALL); 
   LogComponentEnable("nfd.FibEntry", LOG_PREFIX_ALL);  
   LogComponentEnable("ndn.Consumer", LOG_PREFIX_ALL); 
   LogComponentEnable("ndn.cs.Lru", LOG_PREFIX_ALL); 
@@ -175,18 +176,18 @@ main(int argc, char* argv[])
   params.maxg2cDelay = "3ms";
   params.maxg2cBandwidth = "10Mbps";
 
-/*
+///*
   RocketfuelMapReader topo_reader("", 10);
-  std::string topo_file_name = "/home/onur/Downloads/rocketfuel_maps_cch/" + topology_file;
+  std::string topo_file_name = "/home/uceeoas/maps/" + topology_file;
   topo_reader.SetFileName(topo_file_name);
   NodeContainer nodes = topo_reader.Read(params, true, true);
-*/
+//*/
   // Read network (infrastructure) topology from a file 
-  ///*
+  /*
   AnnotatedTopologyReader topologyReader("", 10);
   std::string topo_file_name = "src/ndnSIM/examples/topologies/" + topology_file;
   topologyReader.SetFileName(topo_file_name);
-  NodeContainer nodes = topologyReader.Read();//*/
+  NodeContainer nodes = topologyReader.Read();*/
 
   NS_LOG_INFO("Params");
   NS_LOG_INFO("num_contents "<<num_contents);
@@ -204,10 +205,11 @@ main(int argc, char* argv[])
   NS_LOG_INFO("Number_of_infrastructure_nodes: "<<nodes.GetN()); 
   uint32_t num_infrastructure_nodes = nodes.GetN();
 
-  //Attach a (consumer) node to each router in the topology
   std::map<int, int > app_to_node; //maps app index to access node index
   std::map<int, int > access_to_router; //maps access node index to the next hop router index
-  uint32_t num_connected = 0;
+  uint32_t num_connected = 0; //number of connected applications/users
+  uint32_t num_contents_requested_init=0;  //number of unique content items requested during initialization
+
   // for each of the n infrastructure node attach a user node
   // n-1 customer nodes and a producer node
   NodeContainer consumer_nodes, producer_node, infrastructure_nodes;
@@ -216,7 +218,7 @@ main(int argc, char* argv[])
   nodes.Add(consumer_nodes);
   nodes.Add(producer_node);
   PointToPointHelper p2p;
-  //NS_LOG_INFO("Num total nodes: "<<nodes.GetN());
+  //Attach an endpoint node (NFD) to each router in the topology
   for(uint32_t i = 0; i < num_infrastructure_nodes; i++)
   {
     p2p.Install(nodes.Get(i), nodes.Get(i+num_infrastructure_nodes));
@@ -225,22 +227,23 @@ main(int argc, char* argv[])
     //access_to_router.insert(std::make_pair(i+num_infrastructure_nodes, i));
 	 access_to_router[i+num_infrastructure_nodes] = i;
   }
+  // Save the nodes in the topology (not the consumer nodes) in a container
   for(uint32_t i = 0; i < num_infrastructure_nodes; i++)
   {
     infrastructure_nodes.Add(nodes.Get(i));
   }
-// Install NDN stack on all nodes
+// Install Content Store: Infrastructure nodes get limited storage
   ndn::StackHelper ndnHelperCaching;
   ndnHelperCaching.SetOldContentStore("ns3::ndn::cs::Lru", "MaxSize", std::to_string(cache_size));
   ndnHelperCaching.Install(infrastructure_nodes);
-  
+// Endpoint nodes get unlimited cache (this cache is the storage of all the applications connected to an infrastructure node)
   ndn::StackHelper ndnHelperInfCaching;
   ndnHelperInfCaching.SetOldContentStore("ns3::ndn::cs::Lru", "MaxSize", std::to_string(num_contents));
   ndnHelperInfCaching.Install(consumer_nodes);
   ndnHelperInfCaching.Install(producer_node);
 
   // Set BestRoute strategy
-  ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/best-route");
+  ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/best-route"); //best-route-strategy2.cpp
 
   // Installing global routing interface on all nodes
   ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
@@ -286,6 +289,7 @@ main(int argc, char* argv[])
   std::mt19937 rnd_gen (rd ()); //initialize the random number generator
   // The number of each content connected at each node
   std::map<int, int> connected_content[consumer_apps.GetN()];
+  std::map<int, int> requested_content;
   do 
   {
 	 uint32_t app_indx = rnd_gen()%(consumer_apps.GetN());
@@ -301,7 +305,15 @@ main(int argc, char* argv[])
     connect_time = connect_time + rng_exp_con(rnd_gen);
 	 // Bookkeeping of connected contents, their locations and numbers
 	 connected_content[app_indx][content_indx]++;
+    if(!requested_content[content_indx])
+    {
+      requested_content[content_indx]++;
+      num_contents_requested_init++;
+    }
   }while(connect_time < initialization_period_length);
+  
+  NS_LOG_INFO("Number of connected applications during initialization: "<<num_connected);
+  NS_LOG_INFO("Number of contents requested during initialization: "<<num_contents_requested_init);
 
 //Disconnect Producer from the topology and notify all routers
   //Remove all the FIB table entries for /prefix from all nodes
@@ -316,6 +328,7 @@ main(int argc, char* argv[])
   /***  Observation Period: ***/ 
   connect_time = initialization_period_length + 0.2;
   disconnect_time = connect_time;
+  uint32_t num_disconnections=0;
   double connect_time_next;
 	 
   NS_LOG_INFO("Beginning of Observation Period");
@@ -347,11 +360,12 @@ main(int argc, char* argv[])
 		{
         app_indx = rnd_gen()%(consumer_apps.GetN());
 		}while(connected_content[app_indx].begin() == connected_content[app_indx].end());
-		NS_LOG_INFO("PICK "<<app_to_node[app_indx]);
+		//NS_LOG_INFO("PICK "<<app_to_node[app_indx]);
 		auto it = connected_content[app_indx].begin();
-		NS_LOG_INFO("BEG: "<<it->first<<" "<<it->second);
+		//NS_LOG_INFO("BEG: "<<it->first<<" "<<it->second);
 		std::advance(it, rnd_gen() % connected_content[app_indx].size());
       NS_LOG_INFO("DISCONN "<<app_to_node[app_indx]<<" "<<it->first<<" "<<disconnect_time<<" "<<it->second); 
+      num_disconnections++;
 		it->second = it->second - 1;
 		if(0 == it->second)
 		{
@@ -383,6 +397,7 @@ main(int argc, char* argv[])
 	 }//End of disconnections
 	 connect_time = connect_time_next;
   }//End of Observation Period
+  NS_LOG_INFO("Number of disconnections during observation period: "<<num_disconnections); 
          
   Simulator::Stop(Seconds(observation_period_length + initialization_period_length));
 
