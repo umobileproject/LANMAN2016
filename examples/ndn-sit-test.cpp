@@ -132,10 +132,11 @@ main(int argc, char* argv[])
   std::string topology_file;
   bool bcast_enabled=false;
   uint32_t bcast_scope = 0;
+  double probability = 1; //for probabilistic
 
-  if(argc < 11)
+  if(argc < 12)
   {
-    std::cout<<"Invalid number of parameters: "<<argc<<", Expecting 10\n";
+    std::cout<<"Invalid number of parameters: "<<argc<<", Expecting 11\n";
     exit(0);
   }
 
@@ -156,6 +157,7 @@ main(int argc, char* argv[])
   cmd.AddValue ("topology_file", "Name of the topology file", topology_file);
   cmd.AddValue ("bcast_enabled", "Is flooding enabled", bcast_enabled);
   cmd.AddValue ("bcast_scope", "Scope (in number of hops) of flooding", bcast_scope);
+  cmd.AddValue ("probability", "Probability of caching", probability);
   cmd.Parse(argc, argv);
   
 // Prepare the Topology
@@ -200,6 +202,7 @@ main(int argc, char* argv[])
   NS_LOG_INFO("topology_file "<<topology_file);
   NS_LOG_INFO("bcast_enabled? "<<bcast_enabled);
   NS_LOG_INFO("bcast_scope "<<bcast_scope);
+  NS_LOG_INFO("Probability of caching "<<probability);
   NS_LOG_INFO("End_of_Params");
 
   NS_LOG_INFO("Number_of_infrastructure_nodes: "<<nodes.GetN()); 
@@ -234,7 +237,14 @@ main(int argc, char* argv[])
   }
 // Install Content Store: Infrastructure nodes get limited storage
   ndn::StackHelper ndnHelperCaching;
-  ndnHelperCaching.SetOldContentStore("ns3::ndn::cs::Lru", "MaxSize", std::to_string(cache_size));
+  if(probability == 1)
+  {
+    ndnHelperCaching.SetOldContentStore("ns3::ndn::cs::Lru", "MaxSize", std::to_string(cache_size));
+  }
+  else
+  {
+    ndnHelperCaching.SetOldContentStore("ns3::ndn::cs::Probability::Lru", "MaxSize", std::to_string(cache_size), "CacheProbability", std::to_string(probability));
+  }
   ndnHelperCaching.Install(infrastructure_nodes);
 // Endpoint nodes get unlimited cache (this cache is the storage of all the applications connected to an infrastructure node)
   ndn::StackHelper ndnHelperInfCaching;

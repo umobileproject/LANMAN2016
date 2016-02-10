@@ -70,11 +70,13 @@ Forwarder::onIncomingInterest(Face& inFace, const Interest& interest)
   // receive Interest
   NFD_LOG_DEBUG("onIncomingInterest face=" << inFace.getId() <<
                 " interest=" << interest.getName() << " FloodFlag " << interest.getFloodFlag()<<" Destination Flag "<<interest.getDestinationFlag());
+/*
   if(interest.getName().size() <= 3)
   { 
     NFD_LOG_INFO("onIncomingInterest face=" << inFace.getId() <<
                 " interest=" << interest.getName() << " FloodFlag " << interest.getFloodFlag()<<" Destination Flag "<<interest.getDestinationFlag());
   }
+*/
   const_cast<Interest&>(interest).setIncomingFaceId(inFace.getId());
   ++m_counters.getNInInterests();
 
@@ -327,6 +329,13 @@ Forwarder::onOutgoingInterest(shared_ptr<pit::Entry> pitEntry, Face& outFace,
 	 interest->setFloodFlag(0);
 	 //std::cout << "Setting the destination Flag in the out-going interest packet: "<< pitEntry->getName() << "\n"; 
   }
+  
+  if(interest->getName().size() == 2)
+  { 
+    NFD_LOG_DEBUG("onOutgoingInterest"<< 
+                " name=" << interest->getName() << " FloodFlag " << interest->getFloodFlag()<<" Destination Flag "<<interest->getDestinationFlag());
+    NFD_LOG_INFO("onOutgoingInterest name=" << interest->getName());
+  }
 
   // insert OutRecord
   pitEntry->insertOrUpdateOutRecord(outFace.shared_from_this(), *interest);
@@ -386,10 +395,12 @@ void
 Forwarder::onIncomingData(Face& inFace, const Data& data)
 {
   // receive Data
+  /*
   if(data.getName().size() <= 3)
   { 
     NFD_LOG_INFO("onIncomingData face=" << inFace.getId());
   }
+  */
   NFD_LOG_DEBUG("onIncomingData face=" << inFace.getId() << " data=" << data.getName());
   const_cast<Data&>(data).setIncomingFaceId(inFace.getId());
   ++m_counters.getNInDatas();
@@ -522,6 +533,10 @@ Forwarder::onOutgoingData(const Data& data, Face& outFace)
     return;
   }
   NFD_LOG_DEBUG("onOutgoingData face=" << outFace.getId() << " data=" << data.getName());
+  if(data.getName().size() == 2)
+  { 
+    NFD_LOG_INFO("onOutgoingData name=" << data.getName());
+  }
 
   // /localhost scope control
   bool isViolatingLocalhost = !outFace.isLocal() &&
