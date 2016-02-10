@@ -234,6 +234,10 @@ Forwarder::onContentStoreHit(const Face& inFace,
                              const Data& data)
 {
   NFD_LOG_DEBUG("onContentStoreHit interest=" << interest.getName());
+  if(interest.getName().size() == 2)
+  {
+    NFD_LOG_INFO("Content Store Hit for "<<interest.getName().at(-1).toSequenceNumber());
+  }
 
   beforeSatisfyInterest(*pitEntry, *m_csFace, data);
   this->dispatchToStrategy(pitEntry, bind(&Strategy::beforeSatisfyInterest, _1,

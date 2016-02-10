@@ -88,7 +88,7 @@ public:
    *
    *  \todo change parameter type to Face&
    */
-  void
+  bool
   removeNextHop(shared_ptr<Face> face);
 
 private:

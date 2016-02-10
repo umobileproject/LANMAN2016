@@ -376,13 +376,13 @@ main(int argc, char* argv[])
 		  int router_node = access_to_router[access_node];
         NS_LOG_INFO("RMV_SIT "<<access_node<<" "<<it->first<<" "<<disconnect_time<<" "<<it->second); 
         Simulator::Schedule(Seconds(disconnect_time), (void (*)(Ptr<Node>, const ndn::Name&, Ptr<Node>)) (&ndn::FibHelper::RemoveRoute), nodes.Get(router_node), content, nodes.Get(access_node));
+        Simulator::Schedule(Seconds(disconnect_time), (void (*)(Ptr<Node>, const ndn::Name&)) (&ndn::FibHelper::RemoveRoute), nodes.Get(access_node), content);
 		  connected_content[app_indx].erase(it);
 		  Ptr<Node> n = nodes.Get(access_node);
 		  Ptr<ndn::L3Protocol> p =  ndn::L3Protocol::getL3Protocol(n);
 		  shared_ptr<nfd::Forwarder> f = p->getForwarder();
 		  ns3::Ptr<ns3::ndn::ContentStore> cs = f->getContentStore();
 		  Simulator::Schedule(Seconds(disconnect_time), (&ns3::ndn::ContentStore::Remove), cs, content);
-		//  Simulator::Schedule(Seconds(disconnect_time), (&ndn::cs::ContentStoreImpl<ns3::ndn::ndnSIM::lru_policy_traits>::Remove), der_cs, content);
 		}
 		num_connected--;
       double lambda;

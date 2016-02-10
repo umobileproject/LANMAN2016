@@ -70,13 +70,15 @@ Entry::addNextHop(shared_ptr<Face> face, uint64_t cost)
   this->sortNextHops();
 }
 
-void
+bool
 Entry::removeNextHop(shared_ptr<Face> face)
 {
   auto it = this->findNextHop(*face);
   if (it != m_nextHops.end()) {
     m_nextHops.erase(it);
+    return true;
   }
+  return false;
 }
 
 void
