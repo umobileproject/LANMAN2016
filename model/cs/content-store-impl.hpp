@@ -264,7 +264,9 @@ ContentStoreImpl<Policy>::Add(shared_ptr<const Data> data)
       newEntry->SetTrie(result.first);
       
 		if(data->getName().size() <= 3)
+      {
         NS_LOG_INFO("Added_cache_entry "<<data->getName().at(-1).toSequenceNumber());
+      }
 		//else
         //NS_LOG_INFO("Added_cache_entry "<<data->getName());
   

@@ -92,7 +92,7 @@ namespace ns3 {
  *     NS_LOG=ndn.Consumer:ndn.Producer ./waf --run=ndn-simple-with-link-failure
  */
 
-NS_LOG_COMPONENT_DEFINE ("SitTest");
+NS_LOG_COMPONENT_DEFINE ("SitDebug");
 
 template<typename T>
 void set_new_lambda(std::exponential_distribution<T> *exp_dis, T val)
@@ -120,7 +120,7 @@ main(int argc, char* argv[])
   LogComponentEnable("nfd.FibEntry", LOG_PREFIX_ALL);  
   LogComponentEnable("ndn.Consumer", LOG_PREFIX_ALL); 
   LogComponentEnable("ndn.cs.Lru", LOG_PREFIX_ALL); 
-  LogComponentEnable("SitTest", LOG_PREFIX_ALL);  
+  LogComponentEnable("SitDebug", LOG_PREFIX_ALL);  
   //Parameters of the simulation (to be read from the command line)
   int num_contents;
   double connection_rate;

@@ -50,7 +50,7 @@ Forwarder::Forwarder()
   : m_faceTable(*this)
   , m_fib(m_nameTree)
   , m_pit(m_nameTree)
-  , m_sit(m_nameTree_sit, 10000)
+  , m_sit(m_nameTree_sit, 11000)
   , m_measurements(m_nameTree)
   , m_strategyChoice(m_nameTree, fw::makeDefaultStrategy(*this))
   , m_csFace(make_shared<NullFace>(FaceUri("contentstore://")))
@@ -144,6 +144,9 @@ Forwarder::onContentStoreMiss(const Face& inFace,
 
   // set PIT unsatisfy timer
   this->setUnsatisfyTimer(pitEntry);
+
+// FIB lookup
+//  shared_ptr<fib::Entry> fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
 
   shared_ptr<fib::Entry> fibEntry;
   shared_ptr<fib::Entry> sitEntry;
@@ -334,7 +337,7 @@ Forwarder::onOutgoingInterest(shared_ptr<pit::Entry> pitEntry, Face& outFace,
   { 
     NFD_LOG_DEBUG("onOutgoingInterest"<< 
                 " name=" << interest->getName() << " FloodFlag " << interest->getFloodFlag()<<" Destination Flag "<<interest->getDestinationFlag());
-    NFD_LOG_INFO("onOutgoingInterest name=" << interest->getName());
+    NFD_LOG_INFO("onOutgoingInterest " << interest->getName().at(-1).toSequenceNumber());
   }
 
   // insert OutRecord
@@ -535,7 +538,7 @@ Forwarder::onOutgoingData(const Data& data, Face& outFace)
   NFD_LOG_DEBUG("onOutgoingData face=" << outFace.getId() << " data=" << data.getName());
   if(data.getName().size() == 2)
   { 
-    NFD_LOG_INFO("onOutgoingData name=" << data.getName());
+    NFD_LOG_INFO("onOutgoingData " << data.getName().at(-1).toSequenceNumber());
   }
 
   // /localhost scope control

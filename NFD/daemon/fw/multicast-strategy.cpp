@@ -27,6 +27,7 @@
 
 namespace nfd {
 namespace fw {
+NFD_LOG_INIT("MulticastStrategy");
 
 const Name MulticastStrategy::STRATEGY_NAME("ndn:/localhost/nfd/strategy/multicast/%FD%01");
 NFD_REGISTER_STRATEGY(MulticastStrategy);
@@ -42,17 +43,37 @@ MulticastStrategy::afterReceiveInterest(const Face& inFace,
                    shared_ptr<fib::Entry> fibEntry,
                    shared_ptr<pit::Entry> pitEntry)
 {
-  const fib::NextHopList& nexthops = fibEntry->getNextHops();
-
-  for (fib::NextHopList::const_iterator it = nexthops.begin(); it != nexthops.end(); ++it) {
-    shared_ptr<Face> outFace = it->getFace();
-    if (pitEntry->canForwardTo(*outFace)) {
-      this->sendInterest(pitEntry, outFace);
-    }
+  //Flooding code:
+  if(pitEntry->getFloodFlag())
+  {
+     NFD_LOG_INFO("Flooding the packet " << interest.getName());
+     
+     for (auto& i : this->getFaceTable()) {
+       if(!i->isLocal() && i->getId() != inFace.getId())
+		 {
+         if (pitEntry->canForwardTo(*i)) {
+           this->sendInterest(pitEntry, i);
+			}
+			//else {
+           //NFD_LOG_INFO("CanForwardTo Returned false ");
+			//}
+	    }
+	  }
   }
+  else
+  {
+    const fib::NextHopList& nexthops = fibEntry->getNextHops();
 
-  if (!pitEntry->hasUnexpiredOutRecords()) {
-    this->rejectPendingInterest(pitEntry);
+    for (fib::NextHopList::const_iterator it = nexthops.begin(); it != nexthops.end(); ++it) {
+      shared_ptr<Face> outFace = it->getFace();
+      if (pitEntry->canForwardTo(*outFace)) {
+        this->sendInterest(pitEntry, outFace);
+      }
+    }
+
+    if (!pitEntry->hasUnexpiredOutRecords()) {
+      this->rejectPendingInterest(pitEntry);
+    }
   }
 }
 
