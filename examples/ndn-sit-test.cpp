@@ -54,6 +54,9 @@
 // for obtaining forwarder of a node
 #include "ns3/ndnSIM/model/ndn-l3-protocol.hpp"
 
+//string comparison case insensitive
+#include <boost/algorithm/string.hpp>
+
 namespace ns3 {
 
 /**
@@ -129,13 +132,14 @@ main(int argc, char* argv[])
   double zipf_exponent;
   int cache_size;
   std::string topology_file;
+  std::string strategy;
   bool bcast_enabled=false;
   uint32_t bcast_scope = 0;
   double probability = 1; //for probabilistic
 
-  if(argc < 12)
+  if(argc < 13)
   {
-    std::cout<<"Invalid number of parameters: "<<argc<<", Expecting 11\n";
+    std::cout<<"Invalid number of parameters: "<<argc<<", Expecting 12\n";
     exit(0);
   }
 
@@ -157,6 +161,7 @@ main(int argc, char* argv[])
   cmd.AddValue ("bcast_enabled", "Is flooding enabled", bcast_enabled);
   cmd.AddValue ("bcast_scope", "Scope (in number of hops) of flooding", bcast_scope);
   cmd.AddValue ("probability", "Probability of caching", probability);
+  cmd.AddValue ("strategy", "Forwarding strategy: send to all or one", strategy);
   cmd.Parse(argc, argv);
   
 // Prepare the Topology
@@ -202,6 +207,7 @@ main(int argc, char* argv[])
   NS_LOG_INFO("bcast_enabled? "<<bcast_enabled);
   NS_LOG_INFO("bcast_scope "<<bcast_scope);
   NS_LOG_INFO("Probability of caching "<<probability);
+  NS_LOG_INFO("Forwarding Strategy "<<strategy);
   NS_LOG_INFO("End_of_Params");
 
   NS_LOG_INFO("Number_of_infrastructure_nodes: "<<nodes.GetN()); 
@@ -252,9 +258,16 @@ main(int argc, char* argv[])
   ndnHelperInfCaching.Install(producer_node);
 
   // Set BestRoute strategy
-  //ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/best-route"); //best-route-strategy2.cpp
-  ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/multicast"); //best-route-strategy2.cpp
-
+  if (boost::iequals(strategy, "ALL"))
+  {
+    ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/multicast"); //multicast strategy
+    std::cout<<"Multicast\n";
+  }
+  else
+  {
+    ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/best-route"); //best-route-strategy2.cpp
+    std::cout<<"Unicast\n";
+  }
   // Installing global routing interface on all nodes
   ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
   ndnGlobalRoutingHelper.InstallAll();

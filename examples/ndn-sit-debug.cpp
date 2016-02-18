@@ -130,6 +130,7 @@ main(int argc, char* argv[])
   double zipf_exponent;
   int cache_size;
   std::string topology_file;
+  std::string strategy;
   bool bcast_enabled=false;
   uint32_t bcast_scope = 0;
   double probability = 1; //for probabilistic
@@ -158,6 +159,7 @@ main(int argc, char* argv[])
   cmd.AddValue ("bcast_enabled", "Is flooding enabled", bcast_enabled);
   cmd.AddValue ("bcast_scope", "Scope (in number of hops) of flooding", bcast_scope);
   cmd.AddValue ("probability", "Probability of caching", probability);
+  cmd.AddValue ("strategy", "Forwarding strategy: send to all or one", strategy);
   cmd.Parse(argc, argv);
   
 // Prepare the Topology
@@ -252,9 +254,17 @@ main(int argc, char* argv[])
   ndnHelperInfCaching.Install(consumer_nodes);
   ndnHelperInfCaching.Install(producer_node);
 
+  if (boost::iequals(strategy, "ALL"))
+  {
+    ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/multicast"); //multicast strategy
+    std::cout<<"Multicast\n";
+  }
+  else
+  {
   // Set BestRoute strategy
-  ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/best-route"); //best-route-strategy2.cpp
-
+    ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/best-route"); //best-route-strategy2.cpp
+    std::cout<<"Unicast\n";
+  }
   // Installing global routing interface on all nodes
   ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
   ndnGlobalRoutingHelper.InstallAll();
