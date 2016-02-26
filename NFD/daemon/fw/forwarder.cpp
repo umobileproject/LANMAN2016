@@ -153,9 +153,11 @@ Forwarder::onContentStoreMiss(const Face& inFace,
   // FIB lookup
   if(0 == interest.getDestinationFlag())
   {
-    if(0 == interest.getFloodFlag())
+    if(0 != interest.getFloodFlag())
 	 {
       fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
+      sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
+
       if(m_fib.isEmpty(fibEntry)) { //check SIT table
         sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
 	     if(static_cast<bool>(sitEntry))
@@ -229,7 +231,7 @@ Forwarder::onContentStoreMiss(const Face& inFace,
 
   // dispatch to strategy
   this->dispatchToStrategy(pitEntry, bind(&Strategy::afterReceiveInterest, _1,
-                                          cref(inFace), cref(interest), fibEntry, pitEntry));
+                                          cref(inFace), cref(interest), fibEntry, sitEntry, pitEntry));
 }
 
 void
