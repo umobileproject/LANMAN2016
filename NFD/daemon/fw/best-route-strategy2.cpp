@@ -91,7 +91,7 @@ findEligibleNextHopWithEarliestOutRecord(const shared_ptr<pit::Entry>& pitEntry,
       found = it;
       earliestRenewed = outRecord->getLastRenewed();
     }
-  }
+   }
   return found;
 }
 
@@ -102,80 +102,88 @@ BestRouteStrategy2::afterReceiveInterest(const Face& inFace,
                                          shared_ptr<fib::Entry> sitEntry,
                                          shared_ptr<pit::Entry> pitEntry)
 {
-  //Flooding code:
-  if(pitEntry->getFloodFlag())
-  {
-     NFD_LOG_INFO("Flooding the packet " << interest.getName());
-     
-     for (auto& i : this->getFaceTable()) {
-       if(!i->isLocal() && i->getId() != inFace.getId())
-		 {
-         if (pitEntry->canForwardTo(*i)) {
-           this->sendInterest(pitEntry, i);
-			}
-			else {
-           NFD_LOG_INFO("CanForwardTo Returned false ");
-			}
-	    }
-	  }
-  }
-  //End of Flooding code
-  else{ //not flooding
+  int sdc = interest.getFloodFlag();
+  if(pitEntry->getDestinationFlag())
+  {//Destination Flag is set so follow SIT
+    const fib::NextHopList& nexthops = sitEntry->getNextHops();
+    fib::NextHopList::const_iterator it = nexthops.end();
 
-  const fib::NextHopList& nexthops = fibEntry->getNextHops();
-  fib::NextHopList::const_iterator it = nexthops.end();
-
-  RetxSuppression::Result suppression =
-      m_retxSuppression.decide(inFace, interest, *pitEntry);
-  if (suppression == RetxSuppression::NEW) {
-    // forward to nexthop with lowest cost except downstream
-    it = std::find_if(nexthops.begin(), nexthops.end(),
+    RetxSuppression::Result suppression =
+    m_retxSuppression.decide(inFace, interest, *pitEntry);
+    if (suppression == RetxSuppression::NEW) {
+      // forward to nexthop with lowest cost except downstream
+      it = std::find_if(nexthops.begin(), nexthops.end(),
       bind(&predicate_NextHop_eligible, pitEntry, _1, inFace.getId(),
            false, time::steady_clock::TimePoint::min()));
 
-    if (it == nexthops.end()) {
-      NFD_LOG_DEBUG(interest << " from=" << inFace.getId() << " noNextHop");
-      this->rejectPendingInterest(pitEntry);
+      if (it == nexthops.end()) {
+        NFD_LOG_DEBUG(interest << " from=" << inFace.getId() << " noNextHop");
+        this->rejectPendingInterest(pitEntry);
+        return;
+      }
+
+      shared_ptr<Face> outFace = it->getFace();
+      this->sendInterest(pitEntry, outFace);
+      NFD_LOG_DEBUG(interest << " from=" << inFace.getId()
+                           << " newPitEntry-to=" << outFace->getId());
       return;
     }
 
-    shared_ptr<Face> outFace = it->getFace();
-    this->sendInterest(pitEntry, outFace);
-    NFD_LOG_DEBUG(interest << " from=" << inFace.getId()
-                           << " newPitEntry-to=" << outFace->getId());
-    return;
-  }
-
-  if (suppression == RetxSuppression::SUPPRESS) {
-    NFD_LOG_DEBUG(interest << " from=" << inFace.getId()
+    if (suppression == RetxSuppression::SUPPRESS) {
+      NFD_LOG_DEBUG(interest << " from=" << inFace.getId()
                            << " suppressed");
-    return;
-  }
+      return;
+    }
 
-  // find an unused upstream with lowest cost except downstream
-  it = std::find_if(nexthops.begin(), nexthops.end(),
+    // find an unused upstream with lowest cost except downstream
+    it = std::find_if(nexthops.begin(), nexthops.end(),
                     bind(&predicate_NextHop_eligible, pitEntry, _1, inFace.getId(),
                          true, time::steady_clock::now()));
-  if (it != nexthops.end()) {
-    shared_ptr<Face> outFace = it->getFace();
-    this->sendInterest(pitEntry, outFace);
-    NFD_LOG_DEBUG(interest << " from=" << inFace.getId()
+    if (it != nexthops.end()) {
+      shared_ptr<Face> outFace = it->getFace();
+      this->sendInterest(pitEntry, outFace);
+      NFD_LOG_DEBUG(interest << " from=" << inFace.getId()
                            << " retransmit-unused-to=" << outFace->getId());
-    return;
-  }
+      return;
+    }
 
-  // find an eligible upstream that is used earliest
-  it = findEligibleNextHopWithEarliestOutRecord(pitEntry, nexthops, inFace.getId());
-  if (it == nexthops.end()) {
-    NFD_LOG_DEBUG(interest << " from=" << inFace.getId() << " retransmitNoNextHop");
-  }
-  else {
-    shared_ptr<Face> outFace = it->getFace();
-    this->sendInterest(pitEntry, outFace);
-    NFD_LOG_DEBUG(interest << " from=" << inFace.getId()
+    // find an eligible upstream that is used earliest
+    it = findEligibleNextHopWithEarliestOutRecord(pitEntry, nexthops, inFace.getId());
+    if (it == nexthops.end()) {
+      NFD_LOG_DEBUG(interest << " from=" << inFace.getId() << " retransmitNoNextHop");
+    }
+    else {
+      shared_ptr<Face> outFace = it->getFace();
+      this->sendInterest(pitEntry, outFace);
+      NFD_LOG_DEBUG(interest << " from=" << inFace.getId()
                            << " retransmit-retry-to=" << outFace->getId());
+    }
+  } 
+  else if(!static_cast<bool>(sitEntry) && sdc > 0) //Destination Flag is not set
+  { 
+    const fib::NextHopList& nexthops = sitEntry->getNextHops();
+    //iterate through the nexthops and forward the interest (except inFace)
+    for (fib::NextHopList::const_iterator it = nexthops.begin(); it != nexthops.end(); ++it) 
+    {
+      if (!predicate_NextHop_eligible(pitEntry, *it, inFace.getId()))
+        continue; //skip downstream
+        
+      shared_ptr<Face> outFace = it->getFace();
+	   (*pitEntry).setDestinationFlag(); 
+      this->sendInterest(pitEntry, outFace);
+      sdc = sdc - 1;
+      if(0 == sdc)
+        break; 
+    }
+    if(sdc > 0)
+    {//Forward to fib
+      const fib::NextHopList& nexthops = fibEntry->getNextHops();
+      shared_ptr<Face> outFace = nexthops.begin()->getFace();
+      sdc = sdc - 1;
+      pitEntry->setFloodFlag(sdc);
+      this->sendInterest(pitEntry, outFace);
+    } 
   }
-  } //else of flooding
 }
 /*
 void

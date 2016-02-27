@@ -57,22 +57,22 @@ Entry::clearDestinationFlag()
   m_destination_flag = false;
 }
 
-const bool 
+unsigned int
 Entry::getFloodFlag()
 {
   return m_flood_flag;
 }
 
 void
-Entry::setFloodFlag()
+Entry::setFloodFlag(unsigned int v)
 {
-  m_flood_flag = true;
+  m_flood_flag = v;
 }
 
 void 
 Entry::clearFloodFlag()
 {
-  m_flood_flag = false;
+  m_flood_flag = 0;
 }
 
 const Name&

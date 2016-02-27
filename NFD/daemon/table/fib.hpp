@@ -145,6 +145,9 @@ public: // enumeration
   private:
     NameTree::const_iterator m_nameTreeIterator;
   };
+public:
+  shared_ptr<fib::Entry>
+  getEmptyEntry() const;
 
 private:
   shared_ptr<fib::Entry>

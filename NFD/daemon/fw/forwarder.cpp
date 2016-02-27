@@ -137,6 +137,7 @@ Forwarder::onContentStoreMiss(const Face& inFace,
                               const Interest& interest)
 {
   NFD_LOG_DEBUG("onContentStoreMiss interest=" << interest.getName());
+  unsigned int sdc; //scoped downstream count
 
   shared_ptr<Face> face = const_pointer_cast<Face>(inFace.shared_from_this());
   // insert InRecord
@@ -153,80 +154,34 @@ Forwarder::onContentStoreMiss(const Face& inFace,
   // FIB lookup
   if(0 == interest.getDestinationFlag())
   {
-    if(0 != interest.getFloodFlag())
-	 {
-      fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
-      sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
-
-      if(m_fib.isEmpty(fibEntry)) { //check SIT table
-        sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
-	     if(static_cast<bool>(sitEntry))
-		  {
-          NFD_LOG_DEBUG("SIT table lookup succeeded for: " << interest.getName());
-	       (*pitEntry).setDestinationFlag(); 
-		    fibEntry = sitEntry;
-		  }
-      }
-		else
-        NFD_LOG_DEBUG("FIB table lookup succeeded for: " << interest.getName());
-
+    sdc = interest.getFloodFlag();
+    if(sdc == 0)
+    {
+      //set fib entry to empty and sit entry to null
+      fibEntry = m_fib.getEmptyEntry();
+      sitEntry = NULL;
+      NFD_LOG_DEBUG("Won't Forward packet, Scope is complete: " << interest.getName());
     }
-	 else //flood flag is set
-	 {
-       NFD_LOG_DEBUG("Flood Flag Set in the Interest for: " << interest.getName());
-	    unsigned int hopCount = 0;
-       auto ns3PacketTag = interest.getTag<ns3::ndn::Ns3PacketTag>();
-       if (ns3PacketTag != nullptr) // e.g., packet came from local node's cache
-		 {
-         ns3::ndn::FwHopCountTag hopCountTag;
-         if (ns3PacketTag->getPacket()->PeekPacketTag(hopCountTag)) {
-           hopCount = hopCountTag.Get();
-           NFD_LOG_DEBUG("Interest Hop count: " << hopCount);
-			}
-	    }
-
-	   //flood if no SIT match
+    else
+    {
+      NFD_LOG_DEBUG("Flood Flag Set in the Interest for: " << interest.getName());
+      sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
       fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
-      if(m_fib.isEmpty(fibEntry)) 
-		{ //check SIT table
-        sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
-	     if(static_cast<bool>(sitEntry))
-		  {
-          NFD_LOG_DEBUG("SIT table lookup succeeded for: " << interest.getName());
-	       (*pitEntry).setDestinationFlag(); 
-		    fibEntry = sitEntry;
-		  }
-        else
-		  {
-		    if(hopCount < interest.getFloodFlag())
-			 {
-            NFD_LOG_DEBUG("PIT Entry Flood Flag is set: " << interest.getFloodFlag());
-	         (*pitEntry).setFloodFlag(); 
-			 }
-			 else
-            NFD_LOG_DEBUG("Won't Flood, Scope is complete: " << interest.getName());
-		  }
-	   }
-		else
-          NFD_LOG_DEBUG("FIB table lookup succeeded for: " << interest.getName());
-	 }
+    }
+	 (*pitEntry).setFloodFlag(sdc); 
+	 (*pitEntry).clearDestinationFlag(); 
   }
   else //destination flag == 1
   {
     NFD_LOG_DEBUG("Received a packet with DF set to 1: " << interest.getName());
     sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
-	 if(!static_cast<bool>(sitEntry))
-	 {
-      NFD_LOG_DEBUG("onContentStoreMiss: ERROR, no match in SIT table");
-		//TODO send a NACK???
-      fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
-    }
-	 else
-	 {
-	   (*pitEntry).setDestinationFlag(); 
+    fibEntry = m_fib.getEmptyEntry();
+	 (*pitEntry).setDestinationFlag(); 
+	 (*pitEntry).setFloodFlag(0); 
+    /*
       NFD_LOG_DEBUG("Found an entry for: "<<(*pitEntry).getName()<<" in the SIT table. destination flag is 1");
 	   fibEntry = sitEntry;
-	 }
+	 }*/
   }
 
   // dispatch to strategy
@@ -332,7 +287,10 @@ Forwarder::onOutgoingInterest(shared_ptr<pit::Entry> pitEntry, Face& outFace,
   { //set the destination flag in the Interest packet
     interest->setDestinationFlag(1);
 	 interest->setFloodFlag(0);
-	 //std::cout << "Setting the destination Flag in the out-going interest packet: "<< pitEntry->getName() << "\n"; 
+  }
+  else
+  {
+    interest->setFloodFlag(pitEntry->getFloodFlag());
   }
   
   if(interest->getName().size() == 2)

@@ -197,4 +197,11 @@ Fib::getNameTree() const
   return m_nameTree;
 }
 
+shared_ptr<fib::Entry>  
+Fib::getEmptyEntry() const
+{
+  return s_emptyEntry;
+}
+
+
 } // namespace nfd
