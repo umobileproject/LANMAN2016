@@ -319,8 +319,6 @@ main(int argc, char* argv[])
 	 NS_LOG_INFO( "CON "<<app_to_node[app_indx]<<" "<<content_indx<<" "<<connect_time);
 	 if(bcast_enabled)
       Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::FloodPacketWithSeq, cons, content_indx, bcast_scope);
-	 else
-      Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::SendPacketWithSeq, cons, content_indx);
 	 num_connected++;
     connect_time = connect_time + rng_exp_con(rnd_gen);
 	 // Bookkeeping of connected contents, their locations and numbers
@@ -363,8 +361,6 @@ main(int argc, char* argv[])
 	 NS_LOG_INFO( "CON "<<app_to_node[app_indx]<<" "<<content_indx<<" "<<connect_time);
 	 if(bcast_enabled)
       Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::FloodPacketWithSeq, cons, content_indx, bcast_scope);
-    else
-      Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::SendPacketWithSeq, cons, content_indx);
 	 connected_content[app_indx][content_indx]++;
     connect_time_next = connect_time + rng_exp_con(rnd_gen);
     //while(0)

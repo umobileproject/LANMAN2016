@@ -137,6 +137,11 @@ Forwarder::onContentStoreMiss(const Face& inFace,
                               const Interest& interest)
 {
   NFD_LOG_DEBUG("onContentStoreMiss interest=" << interest.getName());
+  if(interest.getName().size() <= 4)
+  {
+    NFD_LOG_INFO("CS Miss"<<interest.getName().at(-1).toSequenceNumber()<< " DF 0");
+    NFD_LOG_INFO("Number of components in the name: "<<interest.getName().size());
+  }
   unsigned int sdc; //scoped downstream count
 
   shared_ptr<Face> face = const_pointer_cast<Face>(inFace.shared_from_this());
@@ -196,9 +201,13 @@ Forwarder::onContentStoreHit(const Face& inFace,
                              const Data& data)
 {
   NFD_LOG_DEBUG("onContentStoreHit interest=" << interest.getName());
-  if(interest.getName().size() == 2)
+  if(interest.getName().size() == 3 && interest.getDestinationFlag())
   {
-    NFD_LOG_INFO("Content Store Hit for "<<interest.getName().at(-1).toSequenceNumber());
+    NFD_LOG_INFO("CS Hit"<<interest.getName().at(-1).toSequenceNumber()<< " DF 1");
+  }
+  else if(interest.getName().size() == 3)
+  {
+    NFD_LOG_INFO("CS Hit "<<interest.getName().at(-1).toSequenceNumber()<<" DF 0");
   }
 
   beforeSatisfyInterest(*pitEntry, *m_csFace, data);
@@ -286,18 +295,19 @@ Forwarder::onOutgoingInterest(shared_ptr<pit::Entry> pitEntry, Face& outFace,
   if(pitEntry->getDestinationFlag())
   { //set the destination flag in the Interest packet
     interest->setDestinationFlag(1);
-	 interest->setFloodFlag(0);
+	 interest->setFloodFlag(pitEntry->getFloodFlag());
   }
   else
   {
     interest->setFloodFlag(pitEntry->getFloodFlag());
+    interest->setDestinationFlag(0);
   }
   
-  if(interest->getName().size() == 2)
+  if(interest->getName().size() <= 4)
   { 
     NFD_LOG_DEBUG("onOutgoingInterest"<< 
                 " name=" << interest->getName() << " FloodFlag " << interest->getFloodFlag()<<" Destination Flag "<<interest->getDestinationFlag());
-    NFD_LOG_INFO("onOutgoingInterest " << interest->getName().at(-1).toSequenceNumber());
+    NFD_LOG_INFO("Interest out " << interest->getName().at(-1).toSequenceNumber());
   }
 
   // insert OutRecord
@@ -496,9 +506,9 @@ Forwarder::onOutgoingData(const Data& data, Face& outFace)
     return;
   }
   NFD_LOG_DEBUG("onOutgoingData face=" << outFace.getId() << " data=" << data.getName());
-  if(data.getName().size() == 2)
+  if(data.getName().size() == 3)
   { 
-    NFD_LOG_INFO("onOutgoingData " << data.getName().at(-1).toSequenceNumber());
+    NFD_LOG_INFO("Data out " << data.getName().at(-1).toSequenceNumber());
   }
 
   // /localhost scope control

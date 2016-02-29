@@ -17,7 +17,7 @@ public:
   FloodFlag()
   //: m_dfBlock(tlv::FloodFlag) 
   {
-    m_flag = 0;
+    m_flag = 1000; //by default set the scope high so packets can get through
   }
 
   FloodFlag(unsigned int flag)

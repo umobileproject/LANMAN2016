@@ -80,7 +80,7 @@ public:
    * @brief Actually send packet with a given sequence number
    */
   void
-  SendPacketWithSeq(uint32_t seq);
+  SendPacketWithSeq(uint32_t prefixNumber, uint32_t seq, uint32_t scope);
   
   /**
    * @brief Broadcast packet with a given sequence number and scope
