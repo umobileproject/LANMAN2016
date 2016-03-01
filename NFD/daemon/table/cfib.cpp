@@ -57,6 +57,7 @@ Cfib::insert(const Name& prefix)
     if(e.second)
     {
       NFD_LOG_INFO("Removed_SIT entry for "<<(e.first)->getPrefix().at(-1).toSequenceNumber()<<" due to space");
+      //NFD_LOG_INFO("Removed_SIT entry for "<<(e.first)->getPrefix()<<" due to space");
       Fib::erase(*(e.first));  
     }
   }

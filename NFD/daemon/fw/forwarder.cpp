@@ -50,7 +50,7 @@ Forwarder::Forwarder()
   : m_faceTable(*this)
   , m_fib(m_nameTree)
   , m_pit(m_nameTree)
-  , m_sit(m_nameTree_sit, 11000)
+  , m_sit(m_nameTree_sit, 10001)
   , m_measurements(m_nameTree)
   , m_strategyChoice(m_nameTree, fw::makeDefaultStrategy(*this))
   , m_csFace(make_shared<NullFace>(FaceUri("contentstore://")))
@@ -137,10 +137,9 @@ Forwarder::onContentStoreMiss(const Face& inFace,
                               const Interest& interest)
 {
   NFD_LOG_DEBUG("onContentStoreMiss interest=" << interest.getName());
-  NFD_LOG_DEBUG("Number of components in the name: "<<interest.getName().size());
   if(interest.getName().size() == 3)
   {
-    NFD_LOG_DEBUG("CS Miss "<<interest.getName().at(-1).toSequenceNumber()<< " DF "<<interest.getDestinationFlag());
+    //NFD_LOG_DEBUG("CS Miss "<<interest.getName().at(-1).toSequenceNumber()<< " DF "<<interest.getDestinationFlag());
   }
   unsigned int sdc; //scoped downstream count
 
@@ -443,25 +442,30 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
   }
 
   // insert SIT enrty: first lookup the name
-  shared_ptr<fib::Entry> sitEntry = m_sit.findExactMatch(data.getName());
-  if(!static_cast<bool>(sitEntry))
+  shared_ptr<fib::Entry> sitEntry;
+  if(data.getName().size() == 3)
   {
-    //std::cout<<"Inserting sitEntry: "<<data.getName()<<"\n";
-    sitEntry = m_sit.insert(data.getName()).first;
+    sitEntry = m_sit.findExactMatch(data.getName());
+    if(!static_cast<bool>(sitEntry))
+    {
+      //std::cout<<"Inserting sitEntry: "<<data.getName()<<"\n";
+      sitEntry = m_sit.insert(data.getName()).first;
+    }
   }
-
   // foreach pending downstream
   for (std::set<shared_ptr<Face> >::iterator it = pendingDownstreams.begin();
-      it != pendingDownstreams.end(); ++it) {
+    it != pendingDownstreams.end(); ++it) 
+  {
     shared_ptr<Face> pendingDownstream = getFace((*it)->getId());
     if (pendingDownstream.get() == &inFace) {
       continue;
     }
     //insert SIT entry
-	 //if(static_cast<bool> (sitEntry) )
+    if(data.getName().size() == 3 && static_cast<bool> (sitEntry)) 
+    {
       sitEntry->addNextHop(pendingDownstream, 0);
-
-    // goto outgoing Data pipeline
+    }
+      // goto outgoing Data pipeline
     this->onOutgoingData(data, *pendingDownstream);
   }
 }

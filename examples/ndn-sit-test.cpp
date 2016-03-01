@@ -113,6 +113,20 @@ TargetType convert(const std::string& value)
     return converted;
 }
 
+uint32_t get_cost(NodeContainer &nodes, uint32_t app_indx, uint32_t producer_indx)
+{
+  Ptr<Node> n = nodes.Get(app_indx);
+  Ptr<ndn::L3Protocol> p =  ndn::L3Protocol::getL3Protocol(n);
+  shared_ptr<nfd::Forwarder> f = p->getForwarder();
+  ndn::Name name("/prefix");
+  name.appendNumber(producer_indx);
+  uint32_t cost = f->getFib().findLongestPrefixMatch(name)->getNextHops()[0].getCost();
+  NS_LOG_INFO("Cost to "<<name<<" is "<<cost);
+  NS_LOG_DEBUG("Cost to "<<name<<" is "<<cost);
+
+  return cost;
+}
+
 void Schedule_Send(ApplicationContainer consumer_apps, uint32_t app_indx, double connect_time, uint32_t producer_indx, uint32_t scoped_downstream_counter, uint32_t content_indx, uint32_t num_chunks)
 {
   double interpacket = 0.008192; //num. of secs btw outgoing packets (i.e. 1024bytes/10_Mbits/sec)
@@ -296,7 +310,8 @@ main(int argc, char* argv[])
     uint32_t content_indx = content_dist.GetNextSeq(); 
     uint32_t producer_indx = content_indx%(producer_apps.GetN());
     uint32_t app_indx = rnd_gen()%(consumer_apps.GetN());
-	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, scoped_downstream_counter, content_indx, num_chunks);
+    uint32_t cost = get_cost(nodes, app_indx, producer_indx);
+	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, cost + scoped_downstream_counter, content_indx, num_chunks);
 	 num_connected++;
     connect_time = connect_time + rng_exp_con(rnd_gen);
     
