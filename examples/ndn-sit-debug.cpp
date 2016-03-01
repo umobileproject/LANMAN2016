@@ -114,6 +114,19 @@ TargetType convert(const std::string& value)
     return converted;
 }
 
+uint32_t get_cost(NodeContainer &nodes, uint32_t app_indx, uint32_t producer_indx)
+{
+  Ptr<Node> n = nodes.Get(app_indx);
+  Ptr<ndn::L3Protocol> p =  ndn::L3Protocol::getL3Protocol(n);
+  shared_ptr<nfd::Forwarder> f = p->getForwarder();
+  ndn::Name name("/prefix");
+  name.appendNumber(producer_indx);
+  uint32_t cost = f->getFib().findLongestPrefixMatch(name)->getNextHops()[0].getCost();
+  NS_LOG_DEBUG("Cost to "<<name<<" is "<<cost);
+
+  return cost;
+}
+
 void Schedule_Send(ApplicationContainer consumer_apps, uint32_t app_indx, double connect_time, uint32_t producer_indx, uint32_t scoped_downstream_counter, uint32_t content_indx, uint32_t num_chunks)
 {
   double interpacket = 0.008192; //num. of secs btw outgoing packets (i.e. 1024bytes/10_Mbits/sec)
@@ -126,13 +139,16 @@ void Schedule_Send(ApplicationContainer consumer_apps, uint32_t app_indx, double
   if (!static_cast<bool> (cons) )
     NS_LOG_INFO("cons is null ");
   //NS_LOG_INFO("App_indx: "<<app_indx<<" producer_indx: "<<producer_indx<<" num_chunks "<<num_chunks<<" connect_time "<<connect_time);
+  
   for (uint32_t chunk = content_indx; chunk < content_indx + num_chunks; chunk++)
   {
-    NS_LOG_INFO("Sending from "<<app_indx<<" to "<<content_indx<<" at "<<connect_time);
+    NS_LOG_DEBUG("Sending from "<<app_indx<<" to "<<content_indx<<" at "<<connect_time);
     Simulator::Schedule(Seconds(connect_time), &ndn::Consumer::SendPacketWithSeq, cons, producer_indx, chunk, scoped_downstream_counter); 
     connect_time += interpacket;
   }
 }
+
+//NodeContainer nodes;
 
 // Run with: NS_LOG=ndn.Consumer=info:SitTest=info:ndn.cs.Lru=info:nfd.FibManager=info:nfd.Forwarder=info:nfd.Cfib=info:nfd.FibEntry=info
 int
@@ -280,7 +296,6 @@ main(int argc, char* argv[])
 
   // Calculate and install FIBs
   ndn::GlobalRoutingHelper::CalculateRoutes();
-  
   /****************************************************************/
   //Setup Simulation Events (connection, disconnection, etc)
 
@@ -295,7 +310,7 @@ main(int argc, char* argv[])
   std::mt19937 rnd_gen (rd ()); //initialize the random number generator
   // The number of each content connected at each node
   std::map<int, int> requested_content;
-  uint32_t content_indx, producer_indx, app_indx;
+  uint32_t content_indx, producer_indx, app_indx, cost;
   /*
   do 
   {
@@ -316,13 +331,15 @@ main(int argc, char* argv[])
     content_indx = 8; //content_dist.GetNextSeq(); 
     producer_indx = content_indx%(producer_apps.GetN());
     app_indx = 0; //rnd_gen()%(consumer_apps.GetN());
-	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, scoped_downstream_counter, content_indx, num_chunks);
+    cost = get_cost(nodes, app_indx, producer_indx);
+	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, cost + scoped_downstream_counter, content_indx, num_chunks);
 	 num_connected++;
     connect_time = connect_time + rng_exp_con(rnd_gen) + 1;
     
     content_indx = 8; //content_dist.GetNextSeq(); 
     producer_indx = content_indx%(producer_apps.GetN());
     app_indx = 4; //rnd_gen()%(consumer_apps.GetN());
+    cost = get_cost(nodes, app_indx, producer_indx);
 	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, scoped_downstream_counter, content_indx, num_chunks);
 	 num_connected++;
     connect_time = connect_time + rng_exp_con(rnd_gen) + 1;
@@ -330,6 +347,7 @@ main(int argc, char* argv[])
     content_indx = 8; //content_dist.GetNextSeq(); 
     producer_indx = content_indx%(producer_apps.GetN());
     app_indx = 1; //rnd_gen()%(consumer_apps.GetN());
+    cost = get_cost(nodes, app_indx, producer_indx);
 	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, scoped_downstream_counter, content_indx, num_chunks);
 	 num_connected++;
     connect_time = connect_time + rng_exp_con(rnd_gen);

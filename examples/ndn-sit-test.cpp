@@ -277,7 +277,6 @@ main(int argc, char* argv[])
 
   // Calculate and install FIBs
   ndn::GlobalRoutingHelper::CalculateRoutes();
-  
   /****************************************************************/
   //Setup Simulation Events (connection, disconnection, etc)
 
