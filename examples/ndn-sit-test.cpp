@@ -139,6 +139,7 @@ main(int argc, char* argv[])
   LogComponentEnable("nfd.Forwarder", LOG_PREFIX_ALL);  //print time, node , etc. information for each log
   LogComponentEnable("nfd.FibManager", LOG_PREFIX_ALL); 
   LogComponentEnable("nfd.Cfib", LOG_PREFIX_ALL); 
+  LogComponentEnable("nfd.BestRouteStrategy2", LOG_PREFIX_ALL); 
   LogComponentEnable("nfd.FibEntry", LOG_PREFIX_ALL);  
   LogComponentEnable("ndn.Consumer", LOG_PREFIX_ALL); 
   LogComponentEnable("ndn.cs.Lru", LOG_PREFIX_ALL); 

@@ -137,10 +137,10 @@ Forwarder::onContentStoreMiss(const Face& inFace,
                               const Interest& interest)
 {
   NFD_LOG_DEBUG("onContentStoreMiss interest=" << interest.getName());
-  if(interest.getName().size() <= 4)
+  NFD_LOG_DEBUG("Number of components in the name: "<<interest.getName().size());
+  if(interest.getName().size() == 3)
   {
-    NFD_LOG_INFO("CS Miss"<<interest.getName().at(-1).toSequenceNumber()<< " DF 0");
-    NFD_LOG_INFO("Number of components in the name: "<<interest.getName().size());
+    NFD_LOG_DEBUG("CS Miss "<<interest.getName().at(-1).toSequenceNumber()<< " DF "<<interest.getDestinationFlag());
   }
   unsigned int sdc; //scoped downstream count
 
@@ -156,10 +156,10 @@ Forwarder::onContentStoreMiss(const Face& inFace,
 
   shared_ptr<fib::Entry> fibEntry;
   shared_ptr<fib::Entry> sitEntry;
+  sdc = interest.getFloodFlag();
   // FIB lookup
   if(0 == interest.getDestinationFlag())
   {
-    sdc = interest.getFloodFlag();
     if(sdc == 0)
     {
       //set fib entry to empty and sit entry to null
@@ -170,7 +170,7 @@ Forwarder::onContentStoreMiss(const Face& inFace,
     else
     {
       NFD_LOG_DEBUG("Flood Flag Set in the Interest for: " << interest.getName());
-      sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
+      sitEntry = m_sit.findExactMatch(interest.getName());         
       fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
     }
 	 (*pitEntry).setFloodFlag(sdc); 
@@ -182,11 +182,7 @@ Forwarder::onContentStoreMiss(const Face& inFace,
     sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
     fibEntry = m_fib.getEmptyEntry();
 	 (*pitEntry).setDestinationFlag(); 
-	 (*pitEntry).setFloodFlag(0); 
-    /*
-      NFD_LOG_DEBUG("Found an entry for: "<<(*pitEntry).getName()<<" in the SIT table. destination flag is 1");
-	   fibEntry = sitEntry;
-	 }*/
+    (*pitEntry).setFloodFlag(sdc);
   }
 
   // dispatch to strategy
@@ -203,7 +199,7 @@ Forwarder::onContentStoreHit(const Face& inFace,
   NFD_LOG_DEBUG("onContentStoreHit interest=" << interest.getName());
   if(interest.getName().size() == 3 && interest.getDestinationFlag())
   {
-    NFD_LOG_INFO("CS Hit"<<interest.getName().at(-1).toSequenceNumber()<< " DF 1");
+    NFD_LOG_INFO("CS Hit "<<interest.getName().at(-1).toSequenceNumber()<< " DF 1");
   }
   else if(interest.getName().size() == 3)
   {
@@ -303,7 +299,7 @@ Forwarder::onOutgoingInterest(shared_ptr<pit::Entry> pitEntry, Face& outFace,
     interest->setDestinationFlag(0);
   }
   
-  if(interest->getName().size() <= 4)
+  if(interest->getName().size() == 3)
   { 
     NFD_LOG_DEBUG("onOutgoingInterest"<< 
                 " name=" << interest->getName() << " FloodFlag " << interest->getFloodFlag()<<" Destination Flag "<<interest->getDestinationFlag());

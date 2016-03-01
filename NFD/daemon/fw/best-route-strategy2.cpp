@@ -104,7 +104,7 @@ BestRouteStrategy2::afterReceiveInterest(const Face& inFace,
 {
   NFD_LOG_DEBUG("afterReceiveInterest interest=" << interest.getName());
   int sdc = pitEntry->getFloodFlag();
-  if(pitEntry->getDestinationFlag() && static_cast<bool>(sitEntry))
+  if(pitEntry->getDestinationFlag() && static_cast<bool>(sitEntry) && sdc > 0)
   {//Destination Flag is set so follow SIT
     const fib::NextHopList& nexthops = sitEntry->getNextHops();
     fib::NextHopList::const_iterator it = nexthops.end();
@@ -189,10 +189,10 @@ BestRouteStrategy2::afterReceiveInterest(const Face& inFace,
   {
     const fib::NextHopList& nexthops = fibEntry->getNextHops();
     fib::NextHopList::const_iterator it = nexthops.end();
-
-    RetxSuppression::Result suppression =
-        m_retxSuppression.decide(inFace, interest, *pitEntry);
-    if (suppression == RetxSuppression::NEW) {
+    //Disable suppression of out-going interests 
+    //RetxSuppression::Result suppression =
+    //    m_retxSuppression.decide(inFace, interest, *pitEntry);
+    //if (suppression == RetxSuppression::NEW) {
     // forward to nexthop with lowest cost except downstream
       it = std::find_if(nexthops.begin(), nexthops.end(),
            bind(&predicate_NextHop_eligible, pitEntry, _1, inFace.getId(),
@@ -210,9 +210,10 @@ BestRouteStrategy2::afterReceiveInterest(const Face& inFace,
       this->sendInterest(pitEntry, outFace);
       NFD_LOG_DEBUG(interest << " from=" << inFace.getId()
                          << " newPitEntry-to=" << outFace->getId());
-      return;
-    }
-
+      //return;
+    //}
+    
+    /*
     if (suppression == RetxSuppression::SUPPRESS) {
       NFD_LOG_DEBUG(interest << " from=" << inFace.getId()
                            << " suppressed");
@@ -245,18 +246,10 @@ BestRouteStrategy2::afterReceiveInterest(const Face& inFace,
         this->sendInterest(pitEntry, outFace);
         NFD_LOG_DEBUG(interest << " from=" << inFace.getId()
                            << " retransmit-retry-to=" << outFace->getId());
-    }
+    }*/
   } //if sdc > 0
-
-/*
-    {//Forward to fib
-      const fib::NextHopList& nexthops = fibEntry->getNextHops();
-      shared_ptr<Face> outFace = nexthops.begin()->getFace();
-      sdc = sdc - 1;
-      pitEntry->setFloodFlag(sdc);
-      this->sendInterest(pitEntry, outFace);
-    } */ 
 }
+
 /*
 void
 BestRouteStrategy2::beforeExpirePendingInterest(shared_ptr<pit::Entry> pitEntry)
