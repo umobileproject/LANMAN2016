@@ -19,6 +19,8 @@
  **/
 
 // ndn-simple-with-link-failure.cpp
+#include <chrono>
+#include <thread>
 
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
@@ -122,6 +124,7 @@ uint32_t get_cost(NodeContainer &nodes, uint32_t app_indx, uint32_t producer_ind
   ndn::Name name("/prefix");
   name.appendNumber(producer_indx);
   uint32_t cost = f->getFib().findLongestPrefixMatch(name)->getNextHops()[0].getCost();
+  NS_LOG_INFO("Cost to "<<name<<" is "<<cost);
   NS_LOG_DEBUG("Cost to "<<name<<" is "<<cost);
 
   return cost;
@@ -296,6 +299,8 @@ main(int argc, char* argv[])
 
   // Calculate and install FIBs
   ndn::GlobalRoutingHelper::CalculateRoutes();
+  std::this_thread::sleep_for(std::chrono::seconds(2));
+
   /****************************************************************/
   //Setup Simulation Events (connection, disconnection, etc)
 

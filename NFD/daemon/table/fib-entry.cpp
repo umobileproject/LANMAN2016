@@ -58,10 +58,6 @@ Entry::addNextHop(shared_ptr<Face> face, uint64_t cost)
     m_nextHops.push_back(fib::NextHop(face));
     it = m_nextHops.end();
     --it;
-	 if(getPrefix().size() == 2 && !getPrefix().equals(n))
-	 {
-      NFD_LOG_INFO("Added_SIT entry for " << getPrefix().at(-1).toSequenceNumber());
-	 }
   }
   // now it refers to the NextHop for face
 
