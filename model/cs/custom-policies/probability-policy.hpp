@@ -80,10 +80,10 @@ struct probability_policy_traits {
       insert(typename parent_trie::iterator item)
       {
         if (ns3_rand_->GetValue() < probability_) {
-          if(item->key().isSequenceNumber())
-          {
-            NS_LOG_INFO("Added_cache_entry "<<(*item).key().toSequenceNumber());
-          }
+          //if(item->key().isSequenceNumber())
+          //{
+          //  NS_LOG_INFO("Added_cache_entry "<<(*item).key().toSequenceNumber());
+          //}
           policy_container::push_back(*item);
           // allow caching
           return true;
@@ -103,10 +103,10 @@ struct probability_policy_traits {
       inline void
       erase(typename parent_trie::iterator item)
       {
-        if(item->key().isSequenceNumber())
-        {
-          NS_LOG_INFO("Removed_cache_entry "<<(*item).key().toSequenceNumber());
-        }
+        //if(item->key().isSequenceNumber())
+        //{
+        //  NS_LOG_INFO("Removed_cache_entry "<<(*item).key().toSequenceNumber());
+        //}
         policy_container::erase(policy_container::s_iterator_to(*item));
       }
 

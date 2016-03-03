@@ -219,7 +219,6 @@ BestRouteStrategy2::afterReceiveInterest(const Face& inFace,
                            << " suppressed");
       return;
     }
-
     // find an unused upstream with lowest cost except downstream
     it = std::find_if(nexthops.begin(), nexthops.end(),
                     bind(&predicate_NextHop_eligible, pitEntry, _1, inFace.getId(),
@@ -233,7 +232,6 @@ BestRouteStrategy2::afterReceiveInterest(const Face& inFace,
                            << " retransmit-unused-to=" << outFace->getId());
         return;
     }
-
     // find an eligible upstream that is used earliest
     it = findEligibleNextHopWithEarliestOutRecord(pitEntry, nexthops, inFace.getId());
     if (it == nexthops.end()) {
@@ -254,7 +252,6 @@ BestRouteStrategy2::afterReceiveInterest(const Face& inFace,
 void
 BestRouteStrategy2::beforeExpirePendingInterest(shared_ptr<pit::Entry> pitEntry)
 {
-
 }*/
 
 } // namespace fw

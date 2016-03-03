@@ -50,7 +50,7 @@ Forwarder::Forwarder()
   : m_faceTable(*this)
   , m_fib(m_nameTree)
   , m_pit(m_nameTree)
-  , m_sit(m_nameTree_sit, 10001)
+  , m_sit(m_nameTree_sit, 100)
   , m_measurements(m_nameTree)
   , m_strategyChoice(m_nameTree, fw::makeDefaultStrategy(*this))
   , m_csFace(make_shared<NullFace>(FaceUri("contentstore://")))
@@ -139,7 +139,7 @@ Forwarder::onContentStoreMiss(const Face& inFace,
   NFD_LOG_DEBUG("onContentStoreMiss interest=" << interest.getName());
   if(interest.getName().size() == 3)
   {
-    //NFD_LOG_DEBUG("CS Miss "<<interest.getName().at(-1).toSequenceNumber()<< " DF "<<interest.getDestinationFlag());
+    NFD_LOG_DEBUG("CS Miss "<<interest.getName().at(-2).toNumber()<<"/"<<interest.getName().at(-1).toSequenceNumber()<< " DF "<<interest.getDestinationFlag());
   }
   unsigned int sdc; //scoped downstream count
 
@@ -168,7 +168,7 @@ Forwarder::onContentStoreMiss(const Face& inFace,
     }
     else
     {
-      NFD_LOG_DEBUG("Flood Flag Set in the Interest for: " << interest.getName());
+      NFD_LOG_DEBUG("Scope set to "<< sdc << " in the Interest for: " << interest.getName());
       sitEntry = m_sit.findExactMatch(interest.getName());         
       fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
     }
@@ -180,7 +180,7 @@ Forwarder::onContentStoreMiss(const Face& inFace,
     NFD_LOG_DEBUG("Received a packet with DF set to 1: " << interest.getName());
     sitEntry = m_sit.findExactMatch((*pitEntry).getName());         
     fibEntry = m_fib.getEmptyEntry();
-	 (*pitEntry).setDestinationFlag(); 
+    (*pitEntry).setDestinationFlag(); 
     (*pitEntry).setFloodFlag(sdc);
   }
 
@@ -198,11 +198,11 @@ Forwarder::onContentStoreHit(const Face& inFace,
   NFD_LOG_DEBUG("onContentStoreHit interest=" << interest.getName());
   if(interest.getName().size() == 3 && interest.getDestinationFlag())
   {
-    NFD_LOG_INFO("CS Hit "<<interest.getName().at(-1).toSequenceNumber()<< " DF 1");
+    NFD_LOG_INFO("CS Hit "<<interest.getName().at(-2).toNumber()<<"/"<<interest.getName().at(-1).toSequenceNumber()<< " DF 1");
   }
   else if(interest.getName().size() == 3)
   {
-    NFD_LOG_INFO("CS Hit "<<interest.getName().at(-1).toSequenceNumber()<<" DF 0");
+    NFD_LOG_INFO("CS Hit "<<interest.getName().at(-2).toNumber()<<"/"<<interest.getName().at(-1).toSequenceNumber()<< " DF 0");
   }
 
   beforeSatisfyInterest(*pitEntry, *m_csFace, data);
@@ -302,7 +302,7 @@ Forwarder::onOutgoingInterest(shared_ptr<pit::Entry> pitEntry, Face& outFace,
   { 
     NFD_LOG_DEBUG("onOutgoingInterest"<< 
                 " name=" << interest->getName() << " FloodFlag " << interest->getFloodFlag()<<" Destination Flag "<<interest->getDestinationFlag());
-    NFD_LOG_INFO("Interest out " << interest->getName().at(-1).toSequenceNumber());
+    //NFD_LOG_INFO("Interest out " << interest->getName().at(-2).toNumber()<<"/"<<interest->getName().at(-1).toSequenceNumber());
   }
 
   // insert OutRecord
@@ -364,9 +364,9 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
 {
   // receive Data
   /*
-  if(data.getName().size() <= 3)
+  if(data.getName().size() == 3)
   { 
-    NFD_LOG_INFO("onIncomingData face=" << inFace.getId());
+    NFD_LOG_INFO("onIncomingData "<<data.getName().at(-2).toNumber()<<"/"<<data.getName().at(-1).toSequenceNumber());
   }
   */
   NFD_LOG_DEBUG("onIncomingData face=" << inFace.getId() << " data=" << data.getName());
@@ -401,13 +401,13 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
   dataCopyWithoutPacket->removeTag<ns3::ndn::Ns3PacketTag>();
 
   // CS insert
-  //if(data.getName().size() <= 3) 
-  //{ //don't cache mgmt data (e.g. FIB Manager)
+  if(data.getName().size() == 3) 
+  { //don't cache mgmt data (e.g. FIB Manager)
     if (m_csFromNdnSim == nullptr)
       m_cs.insert(*dataCopyWithoutPacket);
     else
       m_csFromNdnSim->Add(dataCopyWithoutPacket);
-  //}
+  }
   std::set<shared_ptr<Face> > pendingDownstreams;
   // foreach PitEntry
   for (const shared_ptr<pit::Entry>& pitEntry : pitMatches) {
@@ -441,17 +441,6 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
     this->setStragglerTimer(pitEntry, true, data.getFreshnessPeriod());
   }
 
-  // insert SIT enrty: first lookup the name
-  shared_ptr<fib::Entry> sitEntry;
-  if(data.getName().size() == 3)
-  {
-    sitEntry = m_sit.findExactMatch(data.getName());
-    if(!static_cast<bool>(sitEntry))
-    {
-      //std::cout<<"Inserting sitEntry: "<<data.getName()<<"\n";
-      sitEntry = m_sit.insert(data.getName()).first;
-    }
-  }
   // foreach pending downstream
   for (std::set<shared_ptr<Face> >::iterator it = pendingDownstreams.begin();
     it != pendingDownstreams.end(); ++it) 
@@ -459,11 +448,6 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
     shared_ptr<Face> pendingDownstream = getFace((*it)->getId());
     if (pendingDownstream.get() == &inFace) {
       continue;
-    }
-    //insert SIT entry
-    if(data.getName().size() == 3 && static_cast<bool> (sitEntry)) 
-    {
-      sitEntry->addNextHop(pendingDownstream, 0);
     }
       // goto outgoing Data pipeline
     this->onOutgoingData(data, *pendingDownstream);
@@ -508,7 +492,7 @@ Forwarder::onOutgoingData(const Data& data, Face& outFace)
   NFD_LOG_DEBUG("onOutgoingData face=" << outFace.getId() << " data=" << data.getName());
   if(data.getName().size() == 3)
   { 
-    NFD_LOG_INFO("Data out " << data.getName().at(-1).toSequenceNumber());
+    NFD_LOG_INFO("Data out " << data.getName().at(-2).toNumber()<<"/"<<data.getName().at(-1).toSequenceNumber());
   }
 
   // /localhost scope control
@@ -519,6 +503,18 @@ Forwarder::onOutgoingData(const Data& data, Face& outFace)
                   " data=" << data.getName() << " violates /localhost");
     // (drop)
     return;
+  }
+  // insert SIT enrty: first lookup the name
+  if(data.getName().size() == 3)
+  {
+    shared_ptr<fib::Entry> sitEntry;
+    sitEntry = m_sit.findExactMatch(data.getName());
+    if(!static_cast<bool>(sitEntry))
+    {
+      //std::cout<<"Inserting sitEntry: "<<data.getName()<<"\n";
+      sitEntry = m_sit.insert(data.getName()).first;
+    }
+    sitEntry->addNextHop(getFace(outFace.getId()), 0);
   }
 
   // TODO traffic manager

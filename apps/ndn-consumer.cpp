@@ -280,7 +280,7 @@ Consumer::SendPacketWithSeq(uint32_t prefixNumber, uint32_t seq, uint32_t scope)
   interest->setInterestLifetime(interestLifeTime);
 
   // NS_LOG_INFO ("Requesting Interest: \n" << *interest);
-  NS_LOG_INFO("> Interest for " << seq);
+  NS_LOG_INFO("> Interest for "<<prefixNumber<<"/"<<seq);
   //NS_LOG_INFO("> Interest for " << *nameWithSequence); //TODO remove
 
   WillSendOutInterest(seq);
@@ -383,7 +383,13 @@ Consumer::OnData(shared_ptr<const Data> data)
 
   // This could be a problem......
   uint32_t seq = data->getName().at(-1).toSequenceNumber();
-  NS_LOG_INFO("< DATA for " << seq);
+  if(data->getName().size() == 3)
+  {
+    uint32_t prefix = data->getName().at(-2).toNumber();
+    NS_LOG_INFO("< DATA for " <<prefix<<"/"<<seq);
+  }
+  else
+    NS_LOG_INFO("< DATA for " << seq);
 
   int hopCount = 0;
   auto ns3PacketTag = data->getTag<Ns3PacketTag>();

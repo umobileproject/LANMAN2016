@@ -17,7 +17,8 @@
  * ndnSIM, e.g., in COPYING.md file.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-// ndn-simple-with-link-failure.cpp
+#include <chrono> //for sleep_for call
+#include <thread> 
 
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
@@ -115,14 +116,20 @@ TargetType convert(const std::string& value)
 
 uint32_t get_cost(NodeContainer &nodes, uint32_t app_indx, uint32_t producer_indx)
 {
+  uint32_t cost;
   Ptr<Node> n = nodes.Get(app_indx);
   Ptr<ndn::L3Protocol> p =  ndn::L3Protocol::getL3Protocol(n);
   shared_ptr<nfd::Forwarder> f = p->getForwarder();
   ndn::Name name("/prefix");
   name.appendNumber(producer_indx);
-  uint32_t cost = f->getFib().findLongestPrefixMatch(name)->getNextHops()[0].getCost();
-  NS_LOG_INFO("Cost to "<<name<<" is "<<cost);
-  NS_LOG_DEBUG("Cost to "<<name<<" is "<<cost);
+  if(f->getFib().findLongestPrefixMatch(name)->hasNextHops())
+    cost = f->getFib().findLongestPrefixMatch(name)->getNextHops()[0].getCost();
+  else
+  {
+    cost = 0;
+  }
+  //NS_LOG_INFO("Cost to "<<name<<" is "<<cost);
+  NS_LOG_DEBUG("Cost to "<<name<<" from "<<app_indx<<" is "<<cost);
 
   return cost;
 }
@@ -169,8 +176,9 @@ main(int argc, char* argv[])
   uint32_t scoped_downstream_counter = 0;
   double probability = 1; //for probabilistic
   uint32_t num_chunks = 1;
+  std::string strategy;
 
-  if(argc < 10)
+  if(argc < 11)
   {
     std::cout<<"Invalid number of parameters: "<<argc<<", Expecting 10\n";
     exit(0);
@@ -192,6 +200,7 @@ main(int argc, char* argv[])
   cmd.AddValue ("scoped_downstream_counter", "Scope in terms of multicast branching factor, the range of search", scoped_downstream_counter);
   cmd.AddValue ("probability", "Probability of caching at each router", probability);
   cmd.AddValue ("num_chunks", "Number of chunks each flow requests", num_chunks);
+  cmd.AddValue ("strategy", "Forwarding strategy: send to all or one", strategy);
   cmd.Parse(argc, argv);
   
 // Prepare the Topology
@@ -235,6 +244,7 @@ main(int argc, char* argv[])
   NS_LOG_INFO("scoped_downstream_counter "<<scoped_downstream_counter);
   NS_LOG_INFO("Probability of caching "<<probability);
   NS_LOG_INFO("Number of chunks "<<num_chunks);
+  NS_LOG_INFO("Strategy: "<<strategy);
   NS_LOG_INFO("End_of_Params");
 
   NS_LOG_INFO("Number_of_infrastructure_nodes: "<<nodes.GetN()); 
@@ -256,8 +266,17 @@ main(int argc, char* argv[])
   }
   ndnHelperCaching.Install(nodes);
 
-  // Set BestRoute strategy
-  ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/best-route"); //best-route-strategy2.cpp
+  // Set forwarding strategy
+  if (boost::iequals(strategy, "ALL"))
+  {
+    ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/multicast"); //multicast strategy
+    NS_LOG_INFO("Multicast Strategy");
+  }
+  else
+  {
+    ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/pickone");
+    NS_LOG_INFO("PickOne Strategy");
+  }
   
   // Installing global routing interface on all nodes
   ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
@@ -291,6 +310,7 @@ main(int argc, char* argv[])
 
   // Calculate and install FIBs
   ndn::GlobalRoutingHelper::CalculateRoutes();
+  std::this_thread::sleep_for(std::chrono::seconds(2));
   /****************************************************************/
   //Setup Simulation Events (connection, disconnection, etc)
 
@@ -325,7 +345,7 @@ main(int argc, char* argv[])
   NS_LOG_INFO("Number of connected applications during initialization: "<<num_connected);
   NS_LOG_INFO("Number of contents requested during initialization: "<<num_contents_requested_init);
   
-  Simulator::Stop(Seconds(simulation_length));
+  Simulator::Stop(Seconds(simulation_length+2));
 
   Simulator::Run();
   Simulator::Destroy();

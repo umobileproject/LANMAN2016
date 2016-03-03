@@ -27,6 +27,9 @@ public:
   void
   erase(const fib::Entry& entry);
 
+  void 
+  setCapacity(size_t capacity);
+
 
 private:
   template<class K, class T>

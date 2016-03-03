@@ -18,9 +18,8 @@
  * ndnSIM, e.g., in COPYING.md file.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-// ndn-simple-with-link-failure.cpp
-#include <chrono> //for sleep
-#include <thread>
+#include <chrono> //for sleep_for call
+#include <thread> 
 
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
@@ -187,8 +186,9 @@ main(int argc, char* argv[])
   uint32_t scoped_downstream_counter = 0;
   double probability = 1; //for probabilistic
   uint32_t num_chunks = 1;
+  std::string strategy;
 
-  if(argc < 10)
+  if(argc < 11)
   {
     std::cout<<"Invalid number of parameters: "<<argc<<", Expecting 10\n";
     exit(0);
@@ -210,6 +210,7 @@ main(int argc, char* argv[])
   cmd.AddValue ("scoped_downstream_counter", "Scope in terms of multicast branching factor, the range of search", scoped_downstream_counter);
   cmd.AddValue ("probability", "Probability of caching at each router", probability);
   cmd.AddValue ("num_chunks", "Number of chunks each flow requests", num_chunks);
+  cmd.AddValue ("strategy", "Forwarding strategy: send to all or one", strategy);
   cmd.Parse(argc, argv);
   
 // Prepare the Topology
@@ -230,19 +231,20 @@ main(int argc, char* argv[])
   params.maxg2cDelay = "3ms";
   params.maxg2cBandwidth = "10Mbps";
 
-/*
+ /*
   RocketfuelMapReader topo_reader("", 10);
   std::string topo_file_name = "/home/uceeoas/maps/" + topology_file;
   topo_reader.SetFileName(topo_file_name);
   NodeContainer nodes = topo_reader.Read(params, true, true);
-*/
+ */
   // Read network (infrastructure) topology from a file 
- // /*
+//  /*
   AnnotatedTopologyReader topologyReader("", 10);
   std::string topo_file_name = "src/ndnSIM/examples/topologies/" + topology_file;
   topologyReader.SetFileName(topo_file_name);
   NodeContainer nodes = topologyReader.Read();
-  //*/
+//  */
+//
 
   NS_LOG_INFO("Params");
   NS_LOG_INFO("num_contents "<<num_contents);
@@ -254,6 +256,7 @@ main(int argc, char* argv[])
   NS_LOG_INFO("scoped_downstream_counter "<<scoped_downstream_counter);
   NS_LOG_INFO("Probability of caching "<<probability);
   NS_LOG_INFO("Number of chunks "<<num_chunks);
+  NS_LOG_INFO("Strategy: "<<strategy);
   NS_LOG_INFO("End_of_Params");
 
   NS_LOG_INFO("Number_of_infrastructure_nodes: "<<nodes.GetN()); 
@@ -274,9 +277,18 @@ main(int argc, char* argv[])
     ndnHelperCaching.SetOldContentStore("ns3::ndn::cs::Probability::Lru", "MaxSize", std::to_string(cache_size), "CacheProbability", std::to_string(probability));
   }
   ndnHelperCaching.Install(nodes);
-
-  // Set BestRoute strategy
-  ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/best-route"); //best-route-strategy2.cpp
+  
+  // Set forwarding strategy
+  if (boost::iequals(strategy, "ALL"))
+  {
+    ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/multicast"); //multicast strategy
+    NS_LOG_INFO("Multicast Strategy");
+  }
+  else
+  {
+    ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/pickone");
+    NS_LOG_INFO("PickOne Strategy");
+  }
   
   // Installing global routing interface on all nodes
   ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
@@ -310,7 +322,7 @@ main(int argc, char* argv[])
 
   // Calculate and install FIBs
   ndn::GlobalRoutingHelper::CalculateRoutes();
-  //std::this_thread::sleep_for(std::chrono::seconds(2));
+  std::this_thread::sleep_for(std::chrono::seconds(2));
 
   /****************************************************************/
   //Setup Simulation Events (connection, disconnection, etc)
@@ -327,7 +339,7 @@ main(int argc, char* argv[])
   // The number of each content connected at each node
   std::map<int, int> requested_content;
   uint32_t content_indx, producer_indx, app_indx, cost;
-  ///*
+  /*
   do 
   {
     content_indx = content_dist.GetNextSeq(); 
@@ -344,9 +356,9 @@ main(int argc, char* argv[])
       num_contents_requested_init++;
     }
   }while(connect_time < simulation_length);
-  // */
-/*
-    content_indx = 8; //content_dist.GetNextSeq(); 
+   */
+///*
+    content_indx = 17; //content_dist.GetNextSeq(); 
     producer_indx = content_indx%(producer_apps.GetN());
     app_indx = 0; //rnd_gen()%(consumer_apps.GetN());
     cost = get_cost(nodes, app_indx, producer_indx);
@@ -354,44 +366,28 @@ main(int argc, char* argv[])
 	 num_connected++;
     connect_time = connect_time + rng_exp_con(rnd_gen) + 1;
     
-    content_indx = 8; //content_dist.GetNextSeq(); 
+    content_indx = 17; //content_dist.GetNextSeq(); 
     producer_indx = content_indx%(producer_apps.GetN());
-    app_indx = 3; //rnd_gen()%(consumer_apps.GetN());
+    app_indx = 6; //rnd_gen()%(consumer_apps.GetN());
     cost = get_cost(nodes, app_indx, producer_indx);
-	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, scoped_downstream_counter, content_indx, num_chunks);
+	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, cost + scoped_downstream_counter, content_indx, num_chunks);
 	 num_connected++;
     connect_time = connect_time + rng_exp_con(rnd_gen) + 1;
     
-    content_indx = 8; //content_dist.GetNextSeq(); 
+    content_indx = 17; //content_dist.GetNextSeq(); 
     producer_indx = content_indx%(producer_apps.GetN());
-    app_indx = 2; //rnd_gen()%(consumer_apps.GetN());
+    app_indx = 7; //rnd_gen()%(consumer_apps.GetN());
     cost = get_cost(nodes, app_indx, producer_indx);
-	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, scoped_downstream_counter, content_indx, num_chunks);
+	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, cost + scoped_downstream_counter, content_indx, num_chunks);
 	 num_connected++;
     connect_time = connect_time + rng_exp_con(rnd_gen);
     
-    content_indx = 8; //content_dist.GetNextSeq(); 
-    producer_indx = content_indx%(producer_apps.GetN());
-    app_indx = 4; //rnd_gen()%(consumer_apps.GetN());
-    cost = get_cost(nodes, app_indx, producer_indx);
-	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, scoped_downstream_counter, content_indx, num_chunks);
-	 num_connected++;
-    connect_time = connect_time + rng_exp_con(rnd_gen);
-    
-    content_indx = 8; //content_dist.GetNextSeq(); 
-    producer_indx = content_indx%(producer_apps.GetN());
-    app_indx = 1; //rnd_gen()%(consumer_apps.GetN());
-    cost = get_cost(nodes, app_indx, producer_indx);
-	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, scoped_downstream_counter, content_indx, num_chunks);
-	 num_connected++;
-    connect_time = connect_time + rng_exp_con(rnd_gen);
-  
-  */
+  // */
   
   NS_LOG_INFO("Number of connected applications during initialization: "<<num_connected);
   NS_LOG_INFO("Number of contents requested during initialization: "<<num_contents_requested_init);
   
-  Simulator::Stop(Seconds(simulation_length));
+  Simulator::Stop(Seconds(simulation_length+1));
 
   Simulator::Run();
   Simulator::Destroy();
