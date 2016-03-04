@@ -50,7 +50,7 @@ Forwarder::Forwarder()
   : m_faceTable(*this)
   , m_fib(m_nameTree)
   , m_pit(m_nameTree)
-  , m_sit(m_nameTree_sit, 100)
+  , m_sit(m_nameTree_sit, 10000)
   , m_measurements(m_nameTree)
   , m_strategyChoice(m_nameTree, fw::makeDefaultStrategy(*this))
   , m_csFace(make_shared<NullFace>(FaceUri("contentstore://")))
@@ -505,7 +505,7 @@ Forwarder::onOutgoingData(const Data& data, Face& outFace)
     return;
   }
   // insert SIT enrty: first lookup the name
-  if(data.getName().size() == 3)
+  if(data.getName().size() == 3 && !outFace.isLocal())
   {
     shared_ptr<fib::Entry> sitEntry;
     sitEntry = m_sit.findExactMatch(data.getName());

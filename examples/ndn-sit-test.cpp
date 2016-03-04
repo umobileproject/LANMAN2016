@@ -157,6 +157,7 @@ void Schedule_Send(ApplicationContainer consumer_apps, uint32_t app_indx, double
 int
 main(int argc, char* argv[])
 {
+ /*
   LogComponentEnable("nfd.Forwarder", LOG_PREFIX_ALL);  //print time, node , etc. information for each log
   LogComponentEnable("nfd.FibManager", LOG_PREFIX_ALL); 
   LogComponentEnable("nfd.Cfib", LOG_PREFIX_ALL); 
@@ -165,7 +166,8 @@ main(int argc, char* argv[])
   LogComponentEnable("ndn.Consumer", LOG_PREFIX_ALL); 
   LogComponentEnable("ndn.cs.Lru", LOG_PREFIX_ALL); 
   LogComponentEnable("SitTest", LOG_PREFIX_ALL);  
-  LogComponentEnable("ndn.cs.ProbabilityImpl", LOG_PREFIX_ALL);  
+  LogComponentEnable("ndn.cs.ProbabilityImpl", LOG_PREFIX_ALL);   */
+
   //Parameters of the simulation (to be read from the command line)
   int num_contents;
   double connection_rate;
@@ -301,7 +303,7 @@ main(int argc, char* argv[])
     ndn::Name n ("/prefix");
     n.appendNumber(i);
     producerHelper.SetPrefix(n.toUri());
-    NS_LOG_INFO("Name set to: "<<n);
+    //NS_LOG_INFO("Name set to: "<<n);
     producerHelper.SetAttribute("PayloadSize", StringValue("1024"));
     producer_apps.Add(producerHelper.Install(nodes.Get(i))); // last node
     // Add /prefix origins to ndn::GlobalRouter
