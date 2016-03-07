@@ -26,6 +26,7 @@
 #ifndef NFD_DAEMON_FW_MULTICAST_STRATEGY_HPP
 #define NFD_DAEMON_FW_MULTICAST_STRATEGY_HPP
 
+#include "retx-suppression-exponential.hpp"
 #include "strategy.hpp"
 
 namespace nfd {
@@ -47,6 +48,9 @@ public:
 
 public:
   static const Name STRATEGY_NAME;
+
+private:
+  RetxSuppressionExponential m_retxSuppression;
 };
 
 } // namespace fw

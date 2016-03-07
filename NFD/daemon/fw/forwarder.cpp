@@ -435,7 +435,7 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
 
     // mark PIT satisfied
     pitEntry->deleteInRecords();
-    pitEntry->deleteOutRecord(inFace);
+    pitEntry->deleteOutRecord(inFace); //deleteOutRecord
 
     // set PIT straggler timer
     this->setStragglerTimer(pitEntry, true, data.getFreshnessPeriod());

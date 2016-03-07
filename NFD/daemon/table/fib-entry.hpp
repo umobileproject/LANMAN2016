@@ -91,6 +91,8 @@ public:
   bool
   removeNextHop(shared_ptr<Face> face);
 
+  void removeAllNextHops(); 
+
 private:
   /** @note This method is non-const because normal iterator is needed by callers.
    */

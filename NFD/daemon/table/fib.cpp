@@ -32,6 +32,7 @@
 #include <type_traits>
 
 namespace nfd {
+NFD_LOG_INIT("Fib");
 
 const shared_ptr<fib::Entry> Fib::s_emptyEntry = make_shared<fib::Entry>(Name());
 
@@ -132,8 +133,25 @@ Fib::insert(const Name& prefix)
 void
 Fib::erase(shared_ptr<name_tree::Entry> nameTreeEntry)
 {
+  /*Onur: Added the following code to remove nexthops 
+  shared_ptr<fib::Entry> entry = nameTreeEntry->getFibEntry();
+  if(entry && entry->hasNextHops())
+  {
+    entry->removeAllNextHops();
+  }
+   end of removing nexthops*/
   nameTreeEntry->setFibEntry(shared_ptr<fib::Entry>());
-  m_nameTree.eraseEntryIfEmpty(nameTreeEntry);
+  //m_nameTree.eraseEntryIfEmpty(nameTreeEntry);
+  if(!m_nameTree.eraseEntryIfEmpty(nameTreeEntry))
+  {
+    NS_LOG_INFO("FibEntry not erased because it is not empty!");
+    std::cout<<"FibEntry not erased because it is not empty!";
+    if(!(nameTreeEntry->getPitEntries().empty()) )
+    {
+      NS_LOG_INFO("PitEntries is not empty!");
+      std::cout<<"PitEntries is not empty!";
+    }
+  }
   --m_nItems;
 }
 

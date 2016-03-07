@@ -84,7 +84,7 @@ RetxSuppressionExponential::decide(const Face& inFace, const Interest& interest,
   shared_ptr<PitInfo> pi = pitEntry.getOrCreateStrategyInfo<PitInfo>(m_initialInterval);
   bool shouldSuppress = sinceLastOutgoing < pi->suppressionInterval;
 
-  if (shouldSuppress) {
+  if (shouldSuppress) { //canForwardTo
     return SUPPRESS;
   }
 

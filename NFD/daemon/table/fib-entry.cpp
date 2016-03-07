@@ -77,6 +77,16 @@ Entry::removeNextHop(shared_ptr<Face> face)
   return false;
 }
 
+/*Onur
+void Entry::removeAllNextHops()
+{
+  for (auto it = m_nextHops.begin(); it != m_nextHops.end(); ++it) 
+  {
+    m_nextHops.erase(it);
+  }
+
+}*/
+
 void
 Entry::sortNextHops()
 {
