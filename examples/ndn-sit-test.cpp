@@ -179,8 +179,9 @@ main(int argc, char* argv[])
   double probability = 1; //for probabilistic
   uint32_t num_chunks = 1;
   std::string strategy;
+  uint32_t sit_size = 0;
 
-  if(argc < 11)
+  if(argc < 12)
   {
     std::cout<<"Invalid number of parameters: "<<argc<<", Expecting 10\n";
     exit(0);
@@ -203,6 +204,7 @@ main(int argc, char* argv[])
   cmd.AddValue ("probability", "Probability of caching at each router", probability);
   cmd.AddValue ("num_chunks", "Number of chunks each flow requests", num_chunks);
   cmd.AddValue ("strategy", "Forwarding strategy: send to all or one", strategy);
+  cmd.AddValue ("sit_size", "SIT table size", sit_size);
   cmd.Parse(argc, argv);
   
 // Prepare the Topology
@@ -247,6 +249,7 @@ main(int argc, char* argv[])
   NS_LOG_INFO("Probability of caching "<<probability);
   NS_LOG_INFO("Number of chunks "<<num_chunks);
   NS_LOG_INFO("Strategy: "<<strategy);
+  NS_LOG_INFO("Sit_size: "<<sit_size);
   NS_LOG_INFO("End_of_Params");
 
   NS_LOG_INFO("Number_of_infrastructure_nodes: "<<nodes.GetN()); 
@@ -310,6 +313,17 @@ main(int argc, char* argv[])
     ndnGlobalRoutingHelper.AddOrigins(n.toUri(), nodes.Get(i));
   }
 
+  //set the SIT table capacity of each node
+  if(sit_size > 0)
+  {
+    for(uint32_t i = 0; i < nodes.GetN(); i++)
+    {
+      Ptr<Node> n = nodes.Get(i);
+      Ptr<ndn::L3Protocol> p =  ndn::L3Protocol::getL3Protocol(n);
+      shared_ptr<nfd::Forwarder> f = p->getForwarder();
+      f->setSitCapacity(sit_size);
+    }
+  }
   // Calculate and install FIBs
   ndn::GlobalRoutingHelper::CalculateRoutes();
   std::this_thread::sleep_for(std::chrono::seconds(2));

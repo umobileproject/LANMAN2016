@@ -171,6 +171,8 @@ main(int argc, char* argv[])
   LogComponentEnable("nfd.FibManager", LOG_PREFIX_ALL); 
   LogComponentEnable("nfd.Cfib", LOG_PREFIX_ALL); 
   LogComponentEnable("nfd.BestRouteStrategy2", LOG_PREFIX_ALL); 
+  LogComponentEnable("nfd.MulticastStrategy", LOG_PREFIX_ALL); 
+  LogComponentEnable("nfd.PickOneStrategy", LOG_PREFIX_ALL); 
   LogComponentEnable("nfd.FibEntry", LOG_PREFIX_ALL);  
   LogComponentEnable("ndn.Consumer", LOG_PREFIX_ALL); 
   LogComponentEnable("ndn.cs.Lru", LOG_PREFIX_ALL); 
@@ -187,8 +189,9 @@ main(int argc, char* argv[])
   double probability = 1; //for probabilistic
   uint32_t num_chunks = 1;
   std::string strategy;
+  uint32_t sit_size = 0;
 
-  if(argc < 11)
+  if(argc < 12)
   {
     std::cout<<"Invalid number of parameters: "<<argc<<", Expecting 10\n";
     exit(0);
@@ -211,6 +214,7 @@ main(int argc, char* argv[])
   cmd.AddValue ("probability", "Probability of caching at each router", probability);
   cmd.AddValue ("num_chunks", "Number of chunks each flow requests", num_chunks);
   cmd.AddValue ("strategy", "Forwarding strategy: send to all or one", strategy);
+  cmd.AddValue ("sit_size", "SIT table size", sit_size);
   cmd.Parse(argc, argv);
   
 // Prepare the Topology
@@ -257,6 +261,7 @@ main(int argc, char* argv[])
   NS_LOG_INFO("Probability of caching "<<probability);
   NS_LOG_INFO("Number of chunks "<<num_chunks);
   NS_LOG_INFO("Strategy: "<<strategy);
+  NS_LOG_INFO("Sit_size: "<<sit_size);
   NS_LOG_INFO("End_of_Params");
 
   NS_LOG_INFO("Number_of_infrastructure_nodes: "<<nodes.GetN()); 
@@ -319,6 +324,19 @@ main(int argc, char* argv[])
     // Add /prefix origins to ndn::GlobalRouter
     ndnGlobalRoutingHelper.AddOrigins(n.toUri(), nodes.Get(i));
   }
+  
+  //set the SIT table capacity of each node 
+  ///*
+  if(sit_size > 0)
+  {
+    for(uint32_t i = 0; i < nodes.GetN(); i++)
+    {
+      Ptr<Node> n = nodes.Get(i);
+      Ptr<ndn::L3Protocol> p =  ndn::L3Protocol::getL3Protocol(n);
+      shared_ptr<nfd::Forwarder> f = p->getForwarder();
+      f->setSitCapacity(sit_size);
+    }
+  }//*/
 
   // Calculate and install FIBs
   ndn::GlobalRoutingHelper::CalculateRoutes();
@@ -381,6 +399,14 @@ main(int argc, char* argv[])
 	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, cost + scoped_downstream_counter, content_indx, num_chunks);
 	 num_connected++;
     connect_time = connect_time + rng_exp_con(rnd_gen);
+    
+    connect_time = 10.0;
+    content_indx = 17; //content_dist.GetNextSeq(); 
+    producer_indx = content_indx%(producer_apps.GetN());
+    app_indx = 7; //rnd_gen()%(consumer_apps.GetN());
+    cost = get_cost(nodes, app_indx, producer_indx);
+	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, cost + scoped_downstream_counter, content_indx, num_chunks);
+	 num_connected++;
     
   // */
   

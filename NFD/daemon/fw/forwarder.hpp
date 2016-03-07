@@ -63,6 +63,12 @@ public:
   const ForwarderCounters&
   getCounters() const;
 
+  void setSitCapacity(size_t capacity)
+  {
+    m_sit.setCapacity(capacity);
+  }
+
+
 public: // faces
   FaceTable&
   getFaceTable();

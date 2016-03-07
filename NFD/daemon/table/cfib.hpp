@@ -69,6 +69,22 @@ private:
       delete m_tail;
       delete [] m_entries;
     }
+    void setCap (size_t size)
+    {
+      //delete m_head;
+      //delete m_tail;
+      //delete m_entries;
+      m_freeEntries.clear();
+      m_entries = new LRUCacheEntry<K,T>[size];
+      for (int i=0; i<size; i++)
+        m_freeEntries.push_back(m_entries+i);
+      m_head = new LRUCacheEntry<K,T>;
+      m_tail = new LRUCacheEntry<K,T>;
+      m_head->prev = NULL;
+      m_head->next = m_tail;
+      m_tail->next = NULL;
+      m_tail->prev = m_head;
+    }
     std::pair<T, bool> 
     put(K key, T data)
     {

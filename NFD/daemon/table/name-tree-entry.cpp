@@ -99,7 +99,7 @@ Entry::erasePitEntry(shared_ptr<pit::Entry> pitEntry)
   std::vector<shared_ptr<pit::Entry> >::iterator it =
     std::find(m_pitEntries.begin(), m_pitEntries.end(), pitEntry);
   BOOST_ASSERT(it != m_pitEntries.end());
-
+  
   *it = m_pitEntries.back();
   m_pitEntries.pop_back();
   pitEntry->m_nameTreeEntry.reset();

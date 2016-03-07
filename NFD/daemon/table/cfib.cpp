@@ -31,6 +31,13 @@ Cfib::findLongestPrefixMatch(const Name& prefix)
   return fibEntry;
 }
 
+void 
+Cfib::setCapacity(size_t capacity)
+{
+  m_cache.setCap(capacity);
+  m_limit = capacity;
+}
+
 shared_ptr<fib::Entry>
 Cfib::findExactMatch(const Name& prefix)
 {

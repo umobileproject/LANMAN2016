@@ -319,6 +319,8 @@ Forwarder::onInterestReject(shared_ptr<pit::Entry> pitEntry)
   if (pitEntry->hasUnexpiredOutRecords()) {
     NFD_LOG_ERROR("onInterestReject interest=" << pitEntry->getName() <<
                   " cannot reject forwarded Interest");
+    //NFD_LOG_INFO("onInterestReject interest=" << pitEntry->getName() <<
+      //            " cannot reject forwarded Interest");
     return;
   }
   NFD_LOG_DEBUG("onInterestReject interest=" << pitEntry->getName());
@@ -351,6 +353,8 @@ Forwarder::onInterestFinalize(shared_ptr<pit::Entry> pitEntry, bool isSatisfied,
   NFD_LOG_DEBUG("onInterestFinalize interest=" << pitEntry->getName() <<
                 (isSatisfied ? " satisfied" : " unsatisfied"));
 
+  //if (!isSatisfied)
+  //  NFD_LOG_INFO("Interest unsatisfied "<<pitEntry->getName());
   // Dead Nonce List insert if necessary
   this->insertDeadNonceList(*pitEntry, isSatisfied, dataFreshnessPeriod, 0);
 

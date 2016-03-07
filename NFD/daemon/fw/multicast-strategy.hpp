@@ -27,6 +27,7 @@
 #define NFD_DAEMON_FW_MULTICAST_STRATEGY_HPP
 
 #include "retx-suppression-exponential.hpp"
+#include "best-route-strategy2.hpp"
 #include "strategy.hpp"
 
 namespace nfd {
