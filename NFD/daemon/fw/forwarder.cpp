@@ -405,7 +405,7 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
   dataCopyWithoutPacket->removeTag<ns3::ndn::Ns3PacketTag>();
 
   // CS insert
-  if(data.getName().size() == 3) 
+  //if(data.getName().size() == 3) 
   { //don't cache mgmt data (e.g. FIB Manager)
     if (m_csFromNdnSim == nullptr)
       m_cs.insert(*dataCopyWithoutPacket);
@@ -519,7 +519,7 @@ Forwarder::onOutgoingData(const Data& data, Face& outFace)
       sitEntry = m_sit.insert(data.getName()).first;
     }
     sitEntry->addNextHop(getFace(outFace.getId()), 0);
-  }
+  }//*/
 
   // TODO traffic manager
 

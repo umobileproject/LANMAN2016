@@ -35,6 +35,7 @@
 // for removing cache entries
 #include "ns3/ndnSIM/model/cs/ndn-content-store.hpp"
 
+
 // for scheduling application-level events (e.g., SendPacket)
 #include "ns3/ndnSIM/apps/ndn-consumer.hpp"
 #include "ns3/ndnSIM/apps/ndn-consumer-cbr.hpp"
@@ -179,22 +180,22 @@ main(int argc, char* argv[])
   LogComponentEnable("SitTest", LOG_PREFIX_ALL);  
   LogComponentEnable("ndn.cs.ProbabilityImpl", LOG_PREFIX_ALL);  
   //Parameters of the simulation (to be read from the command line)
-  int num_contents;
-  double connection_rate;
-  double simulation_length;
-  double zipf_exponent;
-  int cache_size;
-  std::string topology_file;
-  uint32_t scoped_downstream_counter = 0;
-  double probability = 1; //for probabilistic
+  int num_contents=10;
+  double connection_rate=10.0;
+  double simulation_length=400.0;
+  double zipf_exponent=0.7;
+  int cache_size=1;
+  std::string topology_file = "topo-grid-3x3-producer-attached.txt";
+  uint32_t scoped_downstream_counter = 3;
+  double probability = 1.0; //for probabilistic
   uint32_t num_chunks = 1;
-  std::string strategy;
-  uint32_t sit_size = 0;
+  std::string strategy="ALL";
+  uint32_t sit_size = 3;
 
   if(argc < 12)
   {
     std::cout<<"Invalid number of parameters: "<<argc<<", Expecting 10\n";
-    exit(0);
+    //exit(0);
   }
 
   // setting default parameters for PointToPoint user node links
@@ -202,7 +203,7 @@ main(int argc, char* argv[])
   Config::SetDefault("ns3::PointToPointChannel::Delay", StringValue("2ms"));
   Config::SetDefault("ns3::DropTailQueue::MaxPackets", StringValue("20"));
 
-  // Read optional command-line parameters (e.g., enable visualizer with ./waf --run=<> --visualize
+  /* Read optional command-line parameters (e.g., enable visualizer with ./waf --run=<> --visualize
   CommandLine cmd; 
   cmd.AddValue ("num_contents", "Number of contents available", num_contents);
   cmd.AddValue ("connection_rate", "Rate at which connection arrive <0-1>", connection_rate);
@@ -215,7 +216,7 @@ main(int argc, char* argv[])
   cmd.AddValue ("num_chunks", "Number of chunks each flow requests", num_chunks);
   cmd.AddValue ("strategy", "Forwarding strategy: send to all or one", strategy);
   cmd.AddValue ("sit_size", "SIT table size", sit_size);
-  cmd.Parse(argc, argv);
+  cmd.Parse(argc, argv);*/
   
 // Prepare the Topology
   // Read Rocketfuel topology and set producer 
@@ -286,7 +287,7 @@ main(int argc, char* argv[])
   // Set forwarding strategy
   if (boost::iequals(strategy, "ALL"))
   {
-    ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/multicast"); //multicast strategy
+    ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/best-route/%FD%03"); //multicast strategy
     NS_LOG_INFO("Multicast Strategy");
   }
   else
@@ -357,7 +358,7 @@ main(int argc, char* argv[])
   // The number of each content connected at each node
   std::map<int, int> requested_content;
   uint32_t content_indx, producer_indx, app_indx, cost;
-  /*
+  ///*
   do 
   {
     content_indx = content_dist.GetNextSeq(); 
@@ -374,8 +375,8 @@ main(int argc, char* argv[])
       num_contents_requested_init++;
     }
   }while(connect_time < simulation_length);
-   */
-///*
+  // */
+/*
     content_indx = 17; //content_dist.GetNextSeq(); 
     producer_indx = content_indx%(producer_apps.GetN());
     app_indx = 0; //rnd_gen()%(consumer_apps.GetN());
@@ -408,7 +409,7 @@ main(int argc, char* argv[])
 	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, cost + scoped_downstream_counter, content_indx, num_chunks);
 	 num_connected++;
     
-  // */
+   */
   
   NS_LOG_INFO("Number of connected applications during initialization: "<<num_connected);
   NS_LOG_INFO("Number of contents requested during initialization: "<<num_contents_requested_init);
@@ -417,6 +418,8 @@ main(int argc, char* argv[])
 
   Simulator::Run();
   Simulator::Destroy();
+
+  Names::Clear();
 
   return 0;
 }

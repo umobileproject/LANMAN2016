@@ -60,11 +60,12 @@ Cfib::insert(const Name& prefix)
   std::pair<shared_ptr<fib::Entry>, bool> p = Fib::insert(prefix); //returns true for a new nametable entry
   if(p.second)
   {
-    std::pair<shared_ptr<fib::Entry>, bool> e = m_cache.put(p.first->getPrefix(), p.first); 
+    std::pair<shared_ptr<fib::Entry>, bool> e = m_cache.put(prefix, p.first); 
     if(e.second)
     {
       //NFD_LOG_INFO("Removed_SIT entry for "<<(e.first)->getPrefix().at(-1).toSequenceNumber()<<" due to space");
       //NFD_LOG_INFO("Removed_SIT entry for "<<(e.first)->getPrefix()<<" due to space");
+      //e.first.reset();
       Fib::erase(*(e.first));  
     }
   }
@@ -74,6 +75,8 @@ Cfib::insert(const Name& prefix)
 void
 Cfib::erase(const fib::Entry& entry)
 {
+  //if(entry.getNextHops().clear());
+
   shared_ptr<name_tree::Entry> nameTreeEntry = getNameTree().get(entry);
   if (static_cast<bool>(nameTreeEntry)) { 
     //NFD_LOG_INFO("Removed_SIT entry for "<<nameTreeEntry->getPrefix().at(-1).toSequenceNumber());

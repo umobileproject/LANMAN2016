@@ -271,6 +271,7 @@ main(int argc, char* argv[])
   }
   ndnHelperCaching.Install(nodes);
 
+  //ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/best-route/%FD%03"); //multicast strategy
   // Set forwarding strategy
   if (boost::iequals(strategy, "ALL"))
   {
