@@ -24,6 +24,8 @@
  */
 
 #include "multicast-strategy.hpp"
+#include <boost/random/uniform_int_distribution.hpp>
+#include <ndn-cxx/util/random.hpp>
 
 namespace nfd {
 namespace fw {
@@ -70,6 +72,19 @@ predicate_NextHop_eligible(const shared_ptr<pit::Entry>& pitEntry,
   return true;
 }
 
+static bool
+canForwardToNextHop(shared_ptr<pit::Entry> pitEntry, const fib::NextHop& nexthop)
+{
+  return pitEntry->canForwardTo(*nexthop.getFace());
+}
+
+static bool
+hasFaceForForwarding(const fib::NextHopList& nexthops, shared_ptr<pit::Entry>& pitEntry)
+{
+  return std::find_if(nexthops.begin(), nexthops.end(), bind(&canForwardToNextHop, pitEntry, _1))
+         != nexthops.end();
+}
+
 void
 MulticastStrategy::afterReceiveInterest(const Face& inFace,
                    const Interest& interest,
@@ -88,7 +103,27 @@ MulticastStrategy::afterReceiveInterest(const Face& inFace,
   }
 
   if(pitEntry->getDestinationFlag() && static_cast<bool>(sitEntry) /*&& sdc > 0*/)
-  {//Destination Flag is set so follow SIT
+  {//Destination Flag is set so follow a randomly picked nexthop in SIT
+    const fib::NextHopList& nexthops = sitEntry->getNextHops();
+
+    // Ensure there is at least 1 Face is available for forwarding
+    if (hasFaceForForwarding(nexthops, pitEntry)) {
+      fib::NextHopList::const_iterator selected;
+      do {
+        boost::random::uniform_int_distribution<> dist(0, nexthops.size() - 1);
+        const size_t randomIndex = dist(m_randomGenerator);
+
+        uint64_t currentIndex = 0;
+
+        for (selected = nexthops.begin(); selected != nexthops.end() && currentIndex != randomIndex;
+           ++selected, ++currentIndex) {
+        }
+      } while (!canForwardToNextHop(pitEntry, *selected));
+      sent = true;
+      this->sendInterest(pitEntry, selected->getFace());
+    }
+
+/*
     const fib::NextHopList& nexthops = sitEntry->getNextHops();
     fib::NextHopList::const_iterator it = nexthops.end();
 
@@ -105,11 +140,11 @@ MulticastStrategy::afterReceiveInterest(const Face& inFace,
     shared_ptr<Face> outFace = it->getFace();
     //sdc--;
     (*pitEntry).setFloodFlag(sdc);
-    NFD_LOG_INFO("Forwarding DF 0 using SIT interest=" << interest.getName());
+    NFD_LOG_INFO("Forwarding DF 1 using SIT interest=" << interest.getName());
     sent = true;
     this->sendInterest(pitEntry, outFace);
     NFD_LOG_DEBUG(interest << " from=" << inFace.getId()
-                           << " newPitEntry-to=" << outFace->getId());
+                           << " newPitEntry-to=" << outFace->getId());*/
   } 
   else if(!pitEntry->getDestinationFlag() && static_cast<bool>(sitEntry) && sdc > 0 && cost > 0) 
   {  
@@ -142,7 +177,7 @@ MulticastStrategy::afterReceiveInterest(const Face& inFace,
     // forward to nexthop with lowest cost except downstream
     it = std::find_if(nexthops.begin(), nexthops.end(),
          bind(&predicate_NextHop_eligible, pitEntry, _1, inFace.getId(),
-           true, time::steady_clock::TimePoint::min()));
+           false, time::steady_clock::TimePoint::min()));
 
     if (it == nexthops.end()) {
       NFD_LOG_DEBUG(interest << " from=" << inFace.getId() << " noNextHop");
@@ -160,9 +195,10 @@ MulticastStrategy::afterReceiveInterest(const Face& inFace,
                          << " newPitEntry-to=" << outFace->getId());
     }
   } 
+  /*
   if (!sent) {
     this->rejectPendingInterest(pitEntry);
-  }
+  }*/
 }
 
 } // namespace fw

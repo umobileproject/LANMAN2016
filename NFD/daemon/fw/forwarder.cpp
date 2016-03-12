@@ -509,13 +509,17 @@ Forwarder::onOutgoingData(const Data& data, Face& outFace)
     return;
   }
   // insert SIT enrty: first lookup the name
-  if(data.getName().size() == 3 && !outFace.isLocal())
+  if(data.getName().size() == 3 && !outFace.isLocal() && m_sit.getCapacity()>0)
   {
     shared_ptr<fib::Entry> sitEntry;
     sitEntry = m_sit.findExactMatch(data.getName());
     if(!static_cast<bool>(sitEntry))
     {
       //std::cout<<"Inserting sitEntry: "<<data.getName()<<"\n";
+      sitEntry = m_sit.insert(data.getName()).first;
+    }
+    else if(static_cast<bool>(sitEntry) && !sitEntry->hasNextHops())
+    {
       sitEntry = m_sit.insert(data.getName()).first;
     }
     sitEntry->addNextHop(getFace(outFace.getId()), 0);

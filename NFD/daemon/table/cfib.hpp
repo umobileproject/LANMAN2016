@@ -24,12 +24,16 @@ public:
   shared_ptr<fib::Entry>
   findExactMatch(const Name& prefix);
 
+  //void
+  //erase(const fib::Entry& entry);
   void
-  erase(const fib::Entry& entry);
+  erase(fib::Entry& entry);
 
   void 
   setCapacity(size_t capacity);
 
+  size_t
+  getCapacity();
 
 private:
   template<class K, class T>

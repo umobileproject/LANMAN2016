@@ -38,16 +38,22 @@ Cfib::setCapacity(size_t capacity)
   m_limit = capacity;
 }
 
+size_t
+Cfib::getCapacity()
+{
+  return m_limit;
+}
+
 shared_ptr<fib::Entry>
 Cfib::findExactMatch(const Name& prefix)
 {
   shared_ptr<fib::Entry> fibEntry = Fib::findExactMatch(prefix);
-  if(static_cast<bool> (fibEntry) )
+  if(static_cast<bool> (fibEntry) && fibEntry->hasNextHops())
   {
     //update usage in the cache
     if(!m_cache.get(prefix))
     {
-      std::cout << "This should not happen in Cfib findLongestPrefixMatch\n";
+      std::cout << "This should not happen in Cfib findExactMatch\n";
     }
   }
 
@@ -58,7 +64,7 @@ std::pair<shared_ptr<fib::Entry>, bool>
 Cfib::insert(const Name& prefix)
 {
   std::pair<shared_ptr<fib::Entry>, bool> p = Fib::insert(prefix); //returns true for a new nametable entry
-  if(p.second)
+  if(!p.first->hasNextHops())
   {
     std::pair<shared_ptr<fib::Entry>, bool> e = m_cache.put(prefix, p.first); 
     if(e.second)
@@ -66,23 +72,26 @@ Cfib::insert(const Name& prefix)
       //NFD_LOG_INFO("Removed_SIT entry for "<<(e.first)->getPrefix().at(-1).toSequenceNumber()<<" due to space");
       //NFD_LOG_INFO("Removed_SIT entry for "<<(e.first)->getPrefix()<<" due to space");
       //e.first.reset();
-      Fib::erase(*(e.first));  
+      Cfib::erase(*(e.first));  
     }
   }
   return p;
 }
 
+//void
+//Cfib::erase(const fib::Entry& entry)
 void
-Cfib::erase(const fib::Entry& entry)
+Cfib::erase(fib::Entry& entry)
 {
-  //if(entry.getNextHops().clear());
-
+  entry.clearNextHops();
+  //m_cache.remove(entry.getPrefix()); //no need put() already removes the entry
+/*
   shared_ptr<name_tree::Entry> nameTreeEntry = getNameTree().get(entry);
   if (static_cast<bool>(nameTreeEntry)) { 
     //NFD_LOG_INFO("Removed_SIT entry for "<<nameTreeEntry->getPrefix().at(-1).toSequenceNumber());
     m_cache.remove(nameTreeEntry->getPrefix());
   }
-  Fib::erase(entry);
+  Fib::erase(entry);*/
 }
 
 } //namespace nfd

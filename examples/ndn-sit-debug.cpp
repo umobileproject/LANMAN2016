@@ -188,8 +188,8 @@ main(int argc, char* argv[])
   std::string topology_file = "topo-grid-3x3-producer-attached.txt";
   uint32_t scoped_downstream_counter = 3;
   double probability = 1.0; //for probabilistic
-  uint32_t num_chunks = 1;
-  std::string strategy="ALL";
+  uint32_t num_chunks = 3;
+  std::string strategy="ONE";
   uint32_t sit_size = 3;
 
   if(argc < 12)
@@ -287,7 +287,7 @@ main(int argc, char* argv[])
   // Set forwarding strategy
   if (boost::iequals(strategy, "ALL"))
   {
-    ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/best-route/%FD%03"); //multicast strategy
+    ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/multicast"); //multicast strategy
     NS_LOG_INFO("Multicast Strategy");
   }
   else
@@ -358,7 +358,7 @@ main(int argc, char* argv[])
   // The number of each content connected at each node
   std::map<int, int> requested_content;
   uint32_t content_indx, producer_indx, app_indx, cost;
-  ///*
+  /*
   do 
   {
     content_indx = content_dist.GetNextSeq(); 
@@ -375,8 +375,8 @@ main(int argc, char* argv[])
       num_contents_requested_init++;
     }
   }while(connect_time < simulation_length);
-  // */
-/*
+   */
+
     content_indx = 17; //content_dist.GetNextSeq(); 
     producer_indx = content_indx%(producer_apps.GetN());
     app_indx = 0; //rnd_gen()%(consumer_apps.GetN());
@@ -409,7 +409,7 @@ main(int argc, char* argv[])
 	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, cost + scoped_downstream_counter, content_indx, num_chunks);
 	 num_connected++;
     
-   */
+   
   
   NS_LOG_INFO("Number of connected applications during initialization: "<<num_connected);
   NS_LOG_INFO("Number of contents requested during initialization: "<<num_contents_requested_init);

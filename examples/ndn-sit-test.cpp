@@ -169,6 +169,7 @@ main(int argc, char* argv[])
   LogComponentEnable("ndn.cs.ProbabilityImpl", LOG_PREFIX_ALL);   */
 
   //Parameters of the simulation (to be read from the command line)
+  int diameter=0;
   int num_contents;
   double connection_rate;
   double simulation_length;
@@ -278,10 +279,20 @@ main(int argc, char* argv[])
     ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/multicast"); //multicast strategy
     NS_LOG_INFO("Multicast Strategy");
   }
-  else
+  else if (boost::iequals(strategy, "LATEST"))
+  {
+    ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/picklatestone");
+    NS_LOG_INFO("PickOne Strategy");
+  }
+  else if (boost::iequals(strategy, "ONE"))
   {
     ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/pickone");
     NS_LOG_INFO("PickOne Strategy");
+  }
+  else
+  {
+    std::cout <<"Invalid Strategy: "<<strategy;
+    exit(0);
   }
   
   // Installing global routing interface on all nodes
@@ -348,8 +359,14 @@ main(int argc, char* argv[])
     uint32_t producer_indx = content_indx%(producer_apps.GetN());
     uint32_t app_indx = rnd_gen()%(consumer_apps.GetN());
     uint32_t cost = get_cost(nodes, app_indx, producer_indx);
+    if(cost > diameter){
+      diameter = cost;
+    }
 	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, cost + scoped_downstream_counter, content_indx, num_chunks);
 	 num_connected++;
+    if(cost == 0 && (app_indx != producer_indx)){
+      std::cout<<"This should not happen; cost is 0 for different nodes\n";
+    }
     connect_time = connect_time + rng_exp_con(rnd_gen);
     
     if(!requested_content[content_indx])
@@ -357,12 +374,38 @@ main(int argc, char* argv[])
       requested_content[content_indx]++;
       num_contents_requested_init++;
     }
-  }while(connect_time < simulation_length);
+  }while(num_contents_requested_init < (0.3 *(1.0*num_contents)));
+  //while(connect_time < simulation_length);
+  NS_LOG_INFO("Initialization complete "<<num_connected*num_chunks); //initialization is complete after this many interests
   
-  NS_LOG_INFO("Number of connected applications during initialization: "<<num_connected);
-  NS_LOG_INFO("Number of contents requested during initialization: "<<num_contents_requested_init);
+  requested_content.clear();
+  connect_time += 10.0;
+  double init_period_len = connect_time;
+  num_contents_requested_init = 0;
+  num_connected = 0;
+
+  //Real simulation: (Observation time)
+  do 
+  {
+    uint32_t content_indx = content_dist.GetNextSeq(); 
+    uint32_t producer_indx = content_indx%(producer_apps.GetN());
+    uint32_t app_indx = rnd_gen()%(consumer_apps.GetN());
+    uint32_t cost = get_cost(nodes, app_indx, producer_indx);
+	 Schedule_Send(consumer_apps, app_indx, connect_time, producer_indx, cost + scoped_downstream_counter, content_indx, num_chunks);
+	 num_connected++;
+    connect_time = connect_time + rng_exp_con(rnd_gen);
+    if(!requested_content[content_indx])
+    {
+      requested_content[content_indx]++;
+      num_contents_requested_init++;
+    }
+    
+  }while(connect_time < (init_period_len + simulation_length));
   
-  Simulator::Stop(Seconds(simulation_length+2));
+  NS_LOG_INFO("Graph Diameter: "<<diameter);
+  NS_LOG_INFO("Observation complete: Number of Unique content during observation: "<<num_contents_requested_init); //initialization is complete after this many interests
+  NS_LOG_INFO("Observation complete: Number of requests during observation: "<<num_connected); //initialization is complete after this many interests
+  Simulator::Stop(Seconds(init_period_len + simulation_length + 2));
 
   Simulator::Run();
   Simulator::Destroy();

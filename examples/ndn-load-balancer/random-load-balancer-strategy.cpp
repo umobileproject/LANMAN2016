@@ -69,10 +69,10 @@ RandomLoadBalancerStrategy::afterReceiveInterest(const Face& inFace, const Inter
 {
   NFD_LOG_TRACE("afterReceiveInterest");
 
-  if (pitEntry->hasUnexpiredOutRecords()) {
+  //if (pitEntry->hasUnexpiredOutRecords()) {
     // not a new Interest, don't forward
-    return;
-  }
+  //  return;
+  //}
 
   const fib::NextHopList& nexthops = fibEntry->getNextHops();
 
@@ -93,7 +93,7 @@ RandomLoadBalancerStrategy::afterReceiveInterest(const Face& inFace, const Inter
          ++selected, ++currentIndex) {
     }
   } while (!canForwardToNextHop(pitEntry, *selected));
-
+  pitEntry->setFloodFlag((pitEntry->getFloodFlag())-1);
   this->sendInterest(pitEntry, selected->getFace());
 }
 

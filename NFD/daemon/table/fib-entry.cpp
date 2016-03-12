@@ -63,7 +63,11 @@ Entry::addNextHop(shared_ptr<Face> face, uint64_t cost)
 
   it->setCost(cost);
 
-  this->sortNextHops();
+  //Onur:
+  std::iter_swap(it, m_nextHops.begin()); //swap the latest (referenced or added) NextHop to the beginning
+  
+  //Onur: no sorting 
+  //this->sortNextHops();
 }
 
 bool
@@ -77,15 +81,12 @@ Entry::removeNextHop(shared_ptr<Face> face)
   return false;
 }
 
-/*Onur
-void Entry::removeAllNextHops()
+//Onur
+void Entry::clearNextHops()
 {
-  for (auto it = m_nextHops.begin(); it != m_nextHops.end(); ++it) 
-  {
-    m_nextHops.erase(it);
-  }
+  m_nextHops.clear();
 
-}*/
+}
 
 void
 Entry::sortNextHops()
