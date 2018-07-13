@@ -23,3 +23,12 @@ version:
 
 For more information, including downloading and compilation instruction, please refer to
 http://ndnsim.net or documentation in `docs/` folder.
+
+Execution
+---------
+
+To run the simulations of the LANMAN 2016 paper, just type
+
+
+```
+./waf --run=ndn-sit-test
